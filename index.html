@@ -39,8 +39,8 @@
     /* ── CUSTOM CURSOR ─────────────────────────────────────────────── */
     #cursor {
       position: fixed;
-      width: 56px;
-      height: 56px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       pointer-events: none;
       z-index: 9999;
@@ -48,17 +48,17 @@
       transform: translate(-50%, -50%);
       opacity: 0;
       background: radial-gradient(circle at center,
-        rgba(196, 138, 8, 0.22) 0%,
-        rgba(196, 138, 8, 0.08) 45%,
-        transparent 72%);
+        rgba(196, 138, 8, 0.55) 0%,
+        rgba(196, 138, 8, 0.18) 55%,
+        transparent 100%);
       box-shadow:
-        0 0 0 1px rgba(196, 138, 8, 0.18),
-        0 0 24px rgba(196, 138, 8, 0.09);
+        0 0 0 1px rgba(196, 138, 8, 0.25),
+        0 0 12px rgba(196, 138, 8, 0.15);
       transition: opacity 0.35s ease, width 0.22s ease, height 0.22s ease;
       will-change: left, top;
     }
     #cursor.visible   { opacity: 1; }
-    #cursor.on-link   { width: 32px; height: 32px; }
+    #cursor.on-link   { width: 10px; height: 10px; }
 
     /* ── LEFT RAIL ─────────────────────────────────────────────────── */
     .rail {
@@ -529,10 +529,10 @@ function cacheWordPositions() {
     const rect = span.getBoundingClientRect();
     wordStates.push({
       el:  span,
-      cx:  rect.left + rect.width  / 2,          // viewport-x (stable — no h-scroll)
-      cy:  rect.top  + rect.height / 2 + window.scrollY, // abs-y (add scrollY in tick)
-      dy:  0,   // current vertical displacement (px)
-      vy:  0,   // velocity
+      cx:  rect.left + rect.width  / 2,
+      cy:  rect.top  + rect.height / 2 + window.scrollY,
+      dx:  0, vx: 0,   // horizontal spring
+      dy:  0, vy: 0,   // vertical spring
     });
   });
 }
@@ -585,10 +585,10 @@ function annotateWithPretext() {
 //  SPRING PHYSICS CONFIG
 // ════════════════════════════════════════════════════════════════════
 
-const RADIUS     = 72;    // px — influence radius (tight, letter-level)
-const LIFT       = 20;    // px — max vertical lift per character
-const STIFFNESS  = 0.08;  // spring return force
-const DAMPING    = 0.74;  // velocity decay  (0 = no damping, 1 = instant stop)
+const RADIUS     = 52;    // px — influence radius (ambulance clearance zone)
+const PUSH       = 22;    // px — max radial push distance per character
+const STIFFNESS  = 0.09;  // spring return force
+const DAMPING    = 0.72;  // velocity decay
 
 const prefersReducedMotion =
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -604,31 +604,43 @@ function tick() {
   cursor.style.left = `${cursorX}px`;
   cursor.style.top  = `${cursorY}px`;
 
-  // ── Word spring ──────────────────────────────────────────────────
+  // ── Letter spring — ambulance parting ───────────────────────────
+  // Each letter is pushed away from the cursor radially (like cars
+  // clearing a path). Dominant axis is horizontal since text flows
+  // left-to-right, but the push is fully 2-D so diagonal motion
+  // on line-breaks looks natural.
   if (!prefersReducedMotion && cursorLive) {
     const scrollY = window.scrollY;
 
     for (let i = 0; i < wordStates.length; i++) {
       const w = wordStates[i];
 
-      // Convert word's absolute-y to current viewport-y
-      const wordVY = w.cy - scrollY;
+      const wordVY = w.cy - scrollY;           // abs → viewport y
+      const toCursorX = cursorX - w.cx;        // vector: letter → cursor
+      const toCursorY = cursorY - wordVY;
+      const dist = Math.sqrt(toCursorX * toCursorX + toCursorY * toCursorY);
 
-      const dx   = cursorX - w.cx;
-      const dy   = cursorY - wordVY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
+      // Smooth falloff: cubic ease so the edge feels soft
+      const t = Math.max(0, 1 - dist / RADIUS);
+      const influence = t * t * (3 - 2 * t);  // smoothstep
 
-      const influence = Math.max(0, 1 - dist / RADIUS);
-      const targetDy  = -influence * LIFT;
+      // Push letter AWAY from cursor — normalised direction × push magnitude
+      const safeD = dist < 0.5 ? 0.5 : dist;
+      const targetDx = -influence * PUSH * (toCursorX / safeD);
+      const targetDy = -influence * PUSH * (toCursorY / safeD);
 
-      // Spring: acceleration toward target, damped velocity
-      w.vy  += (targetDy - w.dy) * STIFFNESS;
-      w.vy  *= DAMPING;
-      w.dy  += w.vy;
+      // Spring toward target
+      w.vx += (targetDx - w.dx) * STIFFNESS;
+      w.vy += (targetDy - w.dy) * STIFFNESS;
+      w.vx *= DAMPING;
+      w.vy *= DAMPING;
+      w.dx += w.vx;
+      w.dy += w.vy;
 
-      // Only write to DOM if there's meaningful movement
-      if (Math.abs(w.dy) > 0.005 || Math.abs(w.vy) > 0.001) {
-        w.el.style.transform = `translateY(${w.dy.toFixed(2)}px)`;
+      if (Math.abs(w.dx) > 0.01 || Math.abs(w.dy) > 0.01 ||
+          Math.abs(w.vx) > 0.005 || Math.abs(w.vy) > 0.005) {
+        w.el.style.transform =
+          `translate(${w.dx.toFixed(2)}px, ${w.dy.toFixed(2)}px)`;
       }
     }
   }
