@@ -480,44 +480,39 @@ document.querySelectorAll('a, button').forEach(el => {
 });
 
 // ════════════════════════════════════════════════════════════════════
-//  WORD SPLITTING — recursively wraps text nodes in .w spans
+//  CHARACTER SPLITTING — wraps every character in a .w span so the
+//  cursor effect glides letter-by-letter (smooth wave, no stretching)
 // ════════════════════════════════════════════════════════════════════
 
-function wrapWordsIn(el) {
+function wrapCharsIn(el) {
   const children = Array.from(el.childNodes);
   for (const node of children) {
     if (node.nodeType === Node.TEXT_NODE) {
       const raw = node.textContent;
-      if (!raw.trim()) continue;                      // whitespace-only: skip
-      const parts = raw.split(/(\s+)/);
-      if (parts.length <= 1 && !/\s/.test(raw)) {
-        // Single non-space word — just wrap it
-        const span = document.createElement('span');
-        span.className = 'w';
-        span.textContent = raw;
-        node.parentNode.replaceChild(span, node);
-      } else {
-        const frag = document.createDocumentFragment();
-        for (const part of parts) {
-          if (!part) continue;
-          if (/^\s+$/.test(part)) {
-            frag.appendChild(document.createTextNode(part));
-          } else {
-            const span = document.createElement('span');
-            span.className = 'w';
-            span.textContent = part;
-            frag.appendChild(span);
-          }
+      if (!raw.trim()) continue;                    // whitespace-only: skip
+      const frag = document.createDocumentFragment();
+      // Use grapheme segmenter when available (emoji, CJK, etc.)
+      const chars = typeof Intl.Segmenter !== 'undefined'
+        ? [...new Intl.Segmenter().segment(raw)].map(s => s.segment)
+        : [...raw];
+      for (const ch of chars) {
+        if (/^\s+$/.test(ch)) {
+          // Spaces stay as plain text — don't animate them
+          frag.appendChild(document.createTextNode(ch));
+        } else {
+          const span = document.createElement('span');
+          span.className = 'w';
+          span.textContent = ch;
+          frag.appendChild(span);
         }
-        node.parentNode.replaceChild(frag, node);
       }
+      node.parentNode.replaceChild(frag, node);
     } else if (
       node.nodeType === Node.ELEMENT_NODE &&
-      !['SCRIPT','STYLE','SPAN'].includes(node.tagName)
+      !['SCRIPT','STYLE'].includes(node.tagName)
     ) {
-      wrapWordsIn(node);
-    } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SPAN' && !node.classList.contains('w')) {
-      wrapWordsIn(node);
+      if (node.tagName === 'SPAN' && node.classList.contains('w')) continue;
+      wrapCharsIn(node);
     }
   }
 }
@@ -590,8 +585,8 @@ function annotateWithPretext() {
 //  SPRING PHYSICS CONFIG
 // ════════════════════════════════════════════════════════════════════
 
-const RADIUS     = 130;   // px — influence radius
-const LIFT       = 14;    // px — max vertical lift
+const RADIUS     = 72;    // px — influence radius (tight, letter-level)
+const LIFT       = 20;    // px — max vertical lift per character
 const STIFFNESS  = 0.08;  // spring return force
 const DAMPING    = 0.74;  // velocity decay  (0 = no damping, 1 = instant stop)
 
@@ -677,8 +672,8 @@ sections.forEach(s => fadeObserver.observe(s));
 // ════════════════════════════════════════════════════════════════════
 
 async function init() {
-  // 1. Wrap words in animated paragraphs
-  document.querySelectorAll('[data-animate]').forEach(wrapWordsIn);
+  // 1. Wrap characters in animated paragraphs (letter-level spring)
+  document.querySelectorAll('[data-animate]').forEach(wrapCharsIn);
 
   // 2. Load pretext (non-blocking)
   const pretextLoaded = await loadPretext();
