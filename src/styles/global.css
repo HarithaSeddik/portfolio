@@ -22,8 +22,6 @@ body {
 }
 
 #root {
-  display: grid;
-  grid-template-columns: 280px 1fr;
   min-height: 100vh;
 }
 
@@ -71,17 +69,9 @@ body {
 }
 .section.in-view { opacity: 1; transform: none; }
 
-/* Nav active state — toggled by useIntersection */
-.rail-nav a.active {
-  background: var(--amber-pale);
-  color: var(--amber);
-}
-.rail-nav a.active .arr { opacity: 1; }
 
 /* ── MOBILE ──────────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  #root { grid-template-columns: 1fr; }
-  .rail { display: none; }
   main { padding: 40px 24px; }
 }
 

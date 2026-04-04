@@ -1,10 +1,10 @@
 import { useRef } from 'react';
-import { Cursor }    from './components/Cursor/Cursor';
-import { Rail }      from './components/Rail/Rail';
-import { Intro }     from './components/sections/Intro';
-import { Now }       from './components/sections/Now';
-import { Work }      from './components/sections/Work';
-import { Contact }   from './components/sections/Contact';
+import { Cursor }      from './components/Cursor/Cursor';
+import { ChapterNav }  from './components/ChapterNav/ChapterNav';
+import { Intro }       from './components/sections/Intro';
+import { Now }         from './components/sections/Now';
+import { Work }        from './components/sections/Work';
+import { Contact }     from './components/sections/Contact';
 import { usePretext }       from './hooks/usePretext';
 import { useCharSplitter }  from './hooks/useCharSplitter';
 import { useSpringLoop }    from './hooks/useSpringLoop';
@@ -25,7 +25,7 @@ export function App() {
   return (
     <>
       <Cursor />
-      <Rail />
+      <ChapterNav />
       <main ref={mainRef} className={styles.main}>
         <Intro />
         <Now />

@@ -1,0 +1,75 @@
+.nav {
+  position: fixed;
+  right: 32px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 100;
+}
+
+/* Vertical connector line through all dots */
+.nav::before {
+  content: '';
+  position: absolute;
+  right: 3px; /* centre of the 7px dot */
+  top: 14px;
+  bottom: 14px;
+  width: 1px;
+  background: var(--border);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+}
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--faint);
+  transition: background 0.25s ease, transform 0.25s ease;
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+}
+
+.active .dot {
+  background: var(--amber);
+  transform: scale(1.4);
+}
+
+.label {
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0;
+  transform: translateX(6px);
+  transition: opacity 0.2s ease, transform 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.active .label {
+  color: var(--amber);
+}
+
+/* Reveal all labels when hovering the nav */
+.nav:hover .label {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@media (max-width: 900px) {
+  .nav { display: none; }
+}
