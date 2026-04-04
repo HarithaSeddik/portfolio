@@ -1,0 +1,93 @@
+/* ── TOKENS ──────────────────────────────────────────────────────── */
+:root {
+  --bg:         #f9f7f2;
+  --ink:        #17150e;
+  --muted:      #7a7262;
+  --faint:      #c0b9a8;
+  --amber:      #c48a08;
+  --amber-pale: #fdf4df;
+  --border:     #e2dbd0;
+}
+
+/* ── RESET ───────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+}
+
+/* Hide native cursor on fine-pointer (mouse) devices */
+@media (pointer: fine) { body { cursor: none; } }
+
+/* ── CURSOR ──────────────────────────────────────────────────────── */
+#cursor {
+  position: fixed;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  top: 0; left: 0;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  background: radial-gradient(circle at center,
+    rgba(196, 138, 8, 0.55) 0%,
+    rgba(196, 138, 8, 0.18) 55%,
+    transparent 100%);
+  box-shadow:
+    0 0 0 1px rgba(196, 138, 8, 0.25),
+    0 0 12px rgba(196, 138, 8, 0.15);
+  transition: opacity 0.35s ease, width 0.22s ease, height 0.22s ease;
+  will-change: left, top;
+}
+#cursor.visible  { opacity: 1; }
+#cursor.on-link  { width: 10px; height: 10px; }
+
+/* ── SHARED CLASSES WRITTEN BY HOOKS (must stay global) ─────────── */
+
+/* Character spans created by useCharSplitter */
+.w {
+  display: inline-block;
+  will-change: transform;
+}
+
+/* Section entrance animation — toggled by useIntersection */
+.section {
+  margin-bottom: 88px;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.65s ease, transform 0.65s ease;
+}
+.section.in-view { opacity: 1; transform: none; }
+
+/* Nav active state — toggled by useIntersection */
+.rail-nav a.active {
+  background: var(--amber-pale);
+  color: var(--amber);
+}
+.rail-nav a.active .arr { opacity: 1; }
+
+/* ── MOBILE ──────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  #root { grid-template-columns: 1fr; }
+  .rail { display: none; }
+  main { padding: 40px 24px; }
+}
+
+/* ── REDUCED MOTION ──────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .section { opacity: 1; transform: none; transition: none; }
+  .w, .polaroid, .rail-nav a, .rail-social a,
+  .contact-link, .c-arrow { transition: none !important; }
+}

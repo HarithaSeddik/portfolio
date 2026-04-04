@@ -1,0 +1,51 @@
+.expItem {
+  padding: 24px 0;
+  border-bottom: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 24px;
+}
+
+.expDate {
+  font-size: 11px;
+  color: var(--faint);
+  padding-top: 4px;
+  letter-spacing: 0.04em;
+}
+
+.expRole {
+  font-family: 'Syne', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 3px;
+  letter-spacing: -0.01em;
+}
+
+.expCompany {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.expBody {
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.expTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.eTag {
+  font-size: 11px;
+  color: var(--amber);
+  background: var(--amber-pale);
+  padding: 2px 9px;
+  border-radius: 4px;
+}
