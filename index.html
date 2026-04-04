@@ -656,6 +656,15 @@ const navObserver = new IntersectionObserver(entries => {
 sections.forEach(s => navObserver.observe(s));
 
 // ── Section entrance animations ──────────────────────────────────
+// Sections already in viewport on load get shown immediately (no flicker).
+// Sections below the fold fade in as they scroll into view.
+sections.forEach(s => {
+  const rect = s.getBoundingClientRect();
+  if (rect.top < window.innerHeight) {
+    s.classList.add('in-view');
+  }
+});
+
 const fadeObserver = new IntersectionObserver(entries => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
@@ -665,7 +674,9 @@ const fadeObserver = new IntersectionObserver(entries => {
   });
 }, { threshold: 0.05 });
 
-sections.forEach(s => fadeObserver.observe(s));
+sections.forEach(s => {
+  if (!s.classList.contains('in-view')) fadeObserver.observe(s);
+});
 
 // ════════════════════════════════════════════════════════════════════
 //  INIT
