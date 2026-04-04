@@ -31,8 +31,9 @@ export function useSpringLoop({ pretextRef, containerRef }: Options) {
     const prefersReduced =
       window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    const cursorEl = document.getElementById('cursor') as HTMLElement | null;
-    if (!cursorEl) return;
+    const cursorElMaybe = document.getElementById('cursor');
+    if (!cursorElMaybe) return;
+    const cursorEl: HTMLElement = cursorElMaybe;
 
     // ── Mouse tracking ──────────────────────────────────────────────
     const onMove = (e: MouseEvent) => {
