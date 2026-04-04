@@ -2,10 +2,712 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Haritha Akkad — Software Developer</title>
+  <meta name="description" content="Software developer. Flutter, React, Python. Building with agentic AI. Istanbul." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #f9f7f2;
+      --ink:        #17150e;
+      --muted:      #7a7262;
+      --faint:      #c0b9a8;
+      --amber:      #c48a08;
+      --amber-pale: #fdf4df;
+      --border:     #e2dbd0;
+    }
+
+    html, body { height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      min-height: 100vh;
+    }
+
+    /* Hide native cursor only on fine-pointer (mouse) devices */
+    @media (pointer: fine) { body { cursor: none; } }
+
+    /* ── CUSTOM CURSOR ─────────────────────────────────────────────── */
+    #cursor {
+      position: fixed;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      top: 0; left: 0;
+      transform: translate(-50%, -50%);
+      opacity: 0;
+      background: radial-gradient(circle at center,
+        rgba(196, 138, 8, 0.22) 0%,
+        rgba(196, 138, 8, 0.08) 45%,
+        transparent 72%);
+      box-shadow:
+        0 0 0 1px rgba(196, 138, 8, 0.18),
+        0 0 24px rgba(196, 138, 8, 0.09);
+      transition: opacity 0.35s ease, width 0.22s ease, height 0.22s ease;
+      will-change: left, top;
+    }
+    #cursor.visible   { opacity: 1; }
+    #cursor.on-link   { width: 32px; height: 32px; }
+
+    /* ── LEFT RAIL ─────────────────────────────────────────────────── */
+    .rail {
+      position: sticky; top: 0;
+      height: 100vh; overflow-y: auto;
+      border-right: 1px solid var(--border);
+      padding: 40px 32px;
+      display: flex; flex-direction: column;
+      background: var(--bg);
+    }
+    .rail-top { flex: 1; display: flex; flex-direction: column; gap: 40px; }
+
+    .rail-name { display: flex; flex-direction: column; gap: 4px; }
+    .rail-name-big {
+      font-family: 'Syne', sans-serif;
+      font-size: 22px; font-weight: 700;
+      letter-spacing: -.02em; line-height: 1;
+      color: var(--ink);
+    }
+    .rail-name-sub { font-size: 12px; color: var(--muted); }
+
+    .amber-bar { width: 32px; height: 2px; background: var(--amber); }
+
+    .rail-bio {
+      font-size: 13px; font-weight: 300;
+      line-height: 1.75; color: var(--muted);
+    }
+    .rail-bio strong { color: var(--ink); font-weight: 500; }
+
+    .rail-nav { display: flex; flex-direction: column; gap: 2px; }
+    .rail-nav a {
+      font-size: 13px; color: var(--muted);
+      text-decoration: none; padding: 8px 12px;
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.2s, color 0.2s;
+    }
+    .rail-nav a:hover,
+    .rail-nav a.active { background: var(--amber-pale); color: var(--amber); }
+    .rail-nav a .arr { font-size: 11px; opacity: 0; transition: opacity 0.2s; }
+    .rail-nav a:hover .arr,
+    .rail-nav a.active .arr { opacity: 1; }
+
+    .rail-status { display: flex; flex-direction: column; }
+    .status-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 0; border-bottom: 1px solid var(--border);
+    }
+    .status-row:last-child { border-bottom: none; }
+    .status-key { font-size: 11px; color: var(--faint); letter-spacing: .04em; }
+    .status-val { font-size: 12px; font-weight: 500; color: var(--ink); }
+    .status-val.amber { color: var(--amber); }
+
+    .rail-social { display: flex; gap: 12px; flex-wrap: wrap; }
+    .rail-social a {
+      font-size: 11px; font-weight: 500; color: var(--muted);
+      text-decoration: none; letter-spacing: .04em;
+      border-bottom: 1px solid var(--border); padding-bottom: 1px;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .rail-social a:hover { color: var(--amber); border-color: var(--amber); }
+
+    /* ── MAIN CONTENT ──────────────────────────────────────────────── */
+    main { padding: 60px 64px; max-width: 800px; }
+
+    .section { margin-bottom: 88px; }
+    .section-header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 36px; padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(28px, 3vw, 38px);
+      font-weight: 700; letter-spacing: -.025em;
+    }
+    .section-num { font-size: 12px; color: var(--faint); letter-spacing: .08em; }
+
+    .intro-text {
+      font-size: 18px; font-weight: 300;
+      line-height: 1.85; color: var(--muted); margin-bottom: 28px;
+    }
+    .intro-text strong { color: var(--ink); font-weight: 500; }
+    .intro-text em     { font-style: italic; color: var(--amber); }
+
+    /* Currently block */
+    .currently {
+      background: var(--amber-pale);
+      border-left: 3px solid var(--amber);
+      padding: 20px 24px; border-radius: 0 8px 8px 0;
+    }
+    .currently-label {
+      font-size: 10px; font-weight: 500;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--amber); margin-bottom: 6px;
+    }
+    .currently-body {
+      font-size: 15px; font-weight: 300;
+      line-height: 1.65; color: var(--muted);
+    }
+    .currently-body strong { color: var(--ink); font-weight: 500; }
+
+    /* Experience */
+    .exp-item {
+      padding: 24px 0; border-bottom: 1px solid var(--border);
+      display: grid; grid-template-columns: 100px 1fr; gap: 24px;
+    }
+    .exp-date { font-size: 11px; color: var(--faint); padding-top: 4px; letter-spacing: .04em; }
+    .exp-role {
+      font-family: 'Syne', sans-serif;
+      font-size: 17px; font-weight: 600;
+      color: var(--ink); margin-bottom: 3px; letter-spacing: -.01em;
+    }
+    .exp-company { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+    .exp-body { font-size: 14px; font-weight: 300; color: var(--muted); line-height: 1.6; }
+    .exp-tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+    .e-tag {
+      font-size: 11px; color: var(--amber);
+      background: var(--amber-pale); padding: 2px 9px; border-radius: 4px;
+    }
+
+    /* Polaroids */
+    .polaroid-row { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 24px; }
+    .polaroid {
+      background: #fff; padding: 10px 10px 36px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.07);
+      transform: rotate(-1.2deg);
+      transition: transform 0.28s ease;
+    }
+    .polaroid:nth-child(2) { transform: rotate(0.9deg); }
+    .polaroid:hover { transform: rotate(0) scale(1.03) !important; }
+    .ph-img {
+      width: 140px; aspect-ratio: 1;
+      background: #ede9e0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .ph-img span { font-size: 10px; color: #bbb5aa; text-align: center; padding: 6px; }
+    .ph-cap { font-size: 10px; color: #b0a898; text-align: center; margin-top: 8px; font-style: italic; }
+
+    /* Contact */
+    .contact-links { display: flex; flex-direction: column; }
+    .contact-link {
+      display: flex; align-items: center; gap: 16px;
+      font-size: 14px; font-weight: 300; color: var(--muted);
+      text-decoration: none; padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      transition: color 0.2s;
+    }
+    .contact-link:last-child { border-bottom: none; }
+    .contact-link:hover { color: var(--ink); }
+    .c-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 13px; font-weight: 600; color: var(--ink);
+      min-width: 76px;
+      transition: color 0.2s;
+    }
+    .contact-link:hover .c-label { color: var(--amber); }
+    .c-arrow {
+      margin-left: auto; font-size: 12px; color: var(--faint);
+      opacity: 0; transform: translateX(-4px);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+    .contact-link:hover .c-arrow { opacity: 1; transform: none; }
+
+    /* Pretext credit */
+    .pretext-credit {
+      margin-top: 48px; padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 10px; color: var(--faint); letter-spacing: .04em;
+      line-height: 1.6;
+    }
+    .pretext-credit a { color: var(--amber); text-decoration: none; }
+    .pretext-credit a:hover { text-decoration: underline; }
+
+    /* ── WORD SPANS (cursor float effect) ──────────────────────────── */
+    .w { display: inline-block; will-change: transform; }
+
+    /* ── SECTION ENTRANCE ──────────────────────────────────────────── */
+    .section {
+      opacity: 0; transform: translateY(18px);
+      transition: opacity 0.65s ease, transform 0.65s ease;
+    }
+    .section.in-view { opacity: 1; transform: none; }
+
+    /* ── MOBILE ────────────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      body { grid-template-columns: 1fr; }
+      .rail { display: none; }
+      main { padding: 40px 24px; }
+    }
+
+    /* ── REDUCED MOTION ────────────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      .section { opacity: 1; transform: none; transition: none; }
+      .w, .polaroid, .rail-nav a, .rail-social a,
+      .contact-link, .c-arrow { transition: none !important; }
+    }
+  </style>
 </head>
 <body>
-  <h1>Hello World</h1>
-  <p>I should see this on main</p>
+
+<!-- Custom amber cursor -->
+<div id="cursor" aria-hidden="true"></div>
+
+<!-- ── LEFT RAIL ──────────────────────────────────────────────────── -->
+<aside class="rail">
+  <div class="rail-top">
+    <div class="rail-name">
+      <span class="rail-name-big">Haritha<br>Akkad</span>
+      <span class="rail-name-sub">Software Developer · Istanbul</span>
+    </div>
+
+    <div class="amber-bar"></div>
+
+    <p class="rail-bio">Four years shipping production apps. Now deep in <strong>agentic AI</strong> — building, learning, tinkering.</p>
+
+    <nav class="rail-nav" aria-label="Page sections">
+      <a href="#intro" class="active">Intro <span class="arr" aria-hidden="true">→</span></a>
+      <a href="#now">Right now <span class="arr" aria-hidden="true">→</span></a>
+      <a href="#work">Work <span class="arr" aria-hidden="true">→</span></a>
+      <a href="#contact">Contact <span class="arr" aria-hidden="true">→</span></a>
+    </nav>
+
+    <div class="rail-status" role="list" aria-label="Quick stats">
+      <div class="status-row" role="listitem">
+        <span class="status-key">Status</span>
+        <span class="status-val amber">Available</span>
+      </div>
+      <div class="status-row" role="listitem">
+        <span class="status-key">Experience</span>
+        <span class="status-val">4+ years</span>
+      </div>
+      <div class="status-row" role="listitem">
+        <span class="status-key">Users reached</span>
+        <span class="status-val">10M+</span>
+      </div>
+      <div class="status-row" role="listitem">
+        <span class="status-key">Stack</span>
+        <span class="status-val">Flutter · React · Py</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="rail-social">
+    <a href="https://github.com/harithaakkad" target="_blank" rel="noreferrer">GitHub</a>
+    <a href="https://linkedin.com/in/harithaakkad" target="_blank" rel="noreferrer">LinkedIn</a>
+    <a href="/cv.pdf" download>Download CV</a>
+  </div>
+</aside>
+
+<!-- ── MAIN CONTENT ───────────────────────────────────────────────── -->
+<main>
+
+  <!-- 01 INTRO -->
+  <section class="section" id="intro">
+    <div class="section-header">
+      <h1 class="section-title">Hello.</h1>
+      <span class="section-num" aria-label="Section 1 of 4">01 / 04</span>
+    </div>
+    <p class="intro-text" data-animate>I'm a <strong>mobile and web developer</strong> who's been shipping production apps for four years. My day job is Flutter at Kobil GmbH — Turkey's first SuperApp, <strong>10 million users</strong>. My curiosity right now lives in <em>agentic AI</em>.</p>
+    <p class="intro-text" data-animate>I didn't start in mobile. I started with a drone that hunts other drones. Then energy R&D. Then SuperApps. Then AI. It all makes sense in reverse.</p>
+    <div class="polaroid-row" aria-hidden="true">
+      <div class="polaroid">
+        <div class="ph-img"><span>[photo<br>placeholder]</span></div>
+        <p class="ph-cap">somewhere in istanbul</p>
+      </div>
+      <div class="polaroid">
+        <div class="ph-img"><span>[project<br>screenshot]</span></div>
+        <p class="ph-cap">10M users and counting</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 RIGHT NOW -->
+  <section class="section" id="now">
+    <div class="section-header">
+      <h2 class="section-title">Right now</h2>
+      <span class="section-num" aria-label="Section 2 of 4">02 / 04</span>
+    </div>
+    <div class="currently">
+      <div class="currently-label">Currently exploring</div>
+      <p class="currently-body" data-animate><strong>Agentic AI systems</strong> — multi-agent workflows, Claude + MCP integrations, and building software that can reason and act on its own. Not an expert yet. Getting there.</p>
+    </div>
+  </section>
+
+  <!-- 03 WORK -->
+  <section class="section" id="work">
+    <div class="section-header">
+      <h2 class="section-title">Where I've worked</h2>
+      <span class="section-num" aria-label="Section 3 of 4">03 / 04</span>
+    </div>
+
+    <div class="exp-item">
+      <span class="exp-date">2021 – Present</span>
+      <div>
+        <div class="exp-role">Mobile Developer</div>
+        <div class="exp-company">Kobil GmbH</div>
+        <p class="exp-body" data-animate>Turkey's first SuperApp. 10M+ users. Flutter, Firebase, GitLab CI/CD, BLOC state management, and native MethodChannel integrations. Scale where a bug in production is a very bad morning.</p>
+        <div class="exp-tags">
+          <span class="e-tag">Flutter</span>
+          <span class="e-tag">Firebase</span>
+          <span class="e-tag">CI/CD</span>
+          <span class="e-tag">BLOC</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-item">
+      <span class="exp-date">2020 – 2021</span>
+      <div>
+        <div class="exp-role">R&amp;D Engineer</div>
+        <div class="exp-company">Enekom Energy</div>
+        <p class="exp-body" data-animate>Python test tools for hardware devices, RaspberryPi test platforms, Ubuntu server remote testing. The kind of engineering where nothing is documented and you figure it out anyway.</p>
+        <div class="exp-tags">
+          <span class="e-tag">Python</span>
+          <span class="e-tag">Linux</span>
+          <span class="e-tag">RPi</span>
+          <span class="e-tag">SQLite</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="exp-item">
+      <span class="exp-date">2019 – 2020</span>
+      <div>
+        <div class="exp-role">Project Lead</div>
+        <div class="exp-company">Hunter Drone Platform</div>
+        <p class="exp-body" data-animate>Built a drone that hunts other drones. Object detection on Jetson NANO with OpenCV, camera gimbal stabilization. Sponsored by Meteksan Defence. It flew. We were shocked.</p>
+        <div class="exp-tags">
+          <span class="e-tag">Python</span>
+          <span class="e-tag">OpenCV</span>
+          <span class="e-tag">C</span>
+          <span class="e-tag">Jetson NANO</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 CONTACT -->
+  <section class="section" id="contact">
+    <div class="section-header">
+      <h2 class="section-title">Let's talk</h2>
+      <span class="section-num" aria-label="Section 4 of 4">04 / 04</span>
+    </div>
+    <p class="intro-text" data-animate style="margin-bottom: 32px">Open to new opportunities — full-time roles, contract work, or a conversation about something interesting.</p>
+    <div class="contact-links">
+      <a href="mailto:hi@harithaakkad.dev" class="contact-link">
+        <span class="c-label">Email</span>
+        <span>hi@harithaakkad.dev</span>
+        <span class="c-arrow" aria-hidden="true">→</span>
+      </a>
+      <a href="https://github.com/harithaakkad" target="_blank" rel="noreferrer" class="contact-link">
+        <span class="c-label">GitHub</span>
+        <span>github.com/harithaakkad</span>
+        <span class="c-arrow" aria-hidden="true">→</span>
+      </a>
+      <a href="https://linkedin.com/in/harithaakkad" target="_blank" rel="noreferrer" class="contact-link">
+        <span class="c-label">LinkedIn</span>
+        <span>linkedin.com/in/harithaakkad</span>
+        <span class="c-arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <p class="pretext-credit">
+      Text measurement powered by <a href="https://github.com/chenglou/pretext" target="_blank" rel="noreferrer">@chenglou/pretext</a>
+      — character-level layout without DOM thrash. Cursor float uses spring physics on pretext-derived word positions.
+    </p>
+  </section>
+
+</main>
+
+<script type="module">
+// ════════════════════════════════════════════════════════════════════
+//  pretext — precise text measurement for cursor float positions
+//  https://github.com/chenglou/pretext
+// ════════════════════════════════════════════════════════════════════
+
+let prepareWithSegments = null;
+let layoutWithLines = null;
+
+async function loadPretext() {
+  try {
+    const mod = await import('https://esm.sh/@chenglou/pretext@0.0.4');
+    prepareWithSegments = mod.prepareWithSegments;
+    layoutWithLines     = mod.layoutWithLines;
+    return true;
+  } catch (e) {
+    console.warn('[pretext] failed to load — falling back to DOM positions', e);
+    return false;
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  CURSOR
+// ════════════════════════════════════════════════════════════════════
+
+const cursor = document.getElementById('cursor');
+let mouseX   = 0, mouseY   = 0;
+let cursorX  = 0, cursorY  = 0;
+let cursorLive = false;
+
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX;
+  mouseY = e.clientY;
+  if (!cursorLive) {
+    cursorX = mouseX; cursorY = mouseY;
+    cursorLive = true;
+    cursor.classList.add('visible');
+  }
+}, { passive: true });
+
+document.addEventListener('mouseleave', () => cursor.classList.remove('visible'));
+document.addEventListener('mouseenter', () => { if (cursorLive) cursor.classList.add('visible'); });
+
+// Shrink on interactive elements
+document.querySelectorAll('a, button').forEach(el => {
+  el.addEventListener('mouseenter', () => cursor.classList.add('on-link'));
+  el.addEventListener('mouseleave', () => cursor.classList.remove('on-link'));
+});
+
+// ════════════════════════════════════════════════════════════════════
+//  WORD SPLITTING — recursively wraps text nodes in .w spans
+// ════════════════════════════════════════════════════════════════════
+
+function wrapWordsIn(el) {
+  const children = Array.from(el.childNodes);
+  for (const node of children) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      const raw = node.textContent;
+      if (!raw.trim()) continue;                      // whitespace-only: skip
+      const parts = raw.split(/(\s+)/);
+      if (parts.length <= 1 && !/\s/.test(raw)) {
+        // Single non-space word — just wrap it
+        const span = document.createElement('span');
+        span.className = 'w';
+        span.textContent = raw;
+        node.parentNode.replaceChild(span, node);
+      } else {
+        const frag = document.createDocumentFragment();
+        for (const part of parts) {
+          if (!part) continue;
+          if (/^\s+$/.test(part)) {
+            frag.appendChild(document.createTextNode(part));
+          } else {
+            const span = document.createElement('span');
+            span.className = 'w';
+            span.textContent = part;
+            frag.appendChild(span);
+          }
+        }
+        node.parentNode.replaceChild(frag, node);
+      }
+    } else if (
+      node.nodeType === Node.ELEMENT_NODE &&
+      !['SCRIPT','STYLE','SPAN'].includes(node.tagName)
+    ) {
+      wrapWordsIn(node);
+    } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'SPAN' && !node.classList.contains('w')) {
+      wrapWordsIn(node);
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  WORD STATE (for spring physics)
+// ════════════════════════════════════════════════════════════════════
+
+const wordStates = [];
+
+function cacheWordPositions() {
+  wordStates.length = 0;
+  document.querySelectorAll('[data-animate] .w').forEach(span => {
+    const rect = span.getBoundingClientRect();
+    wordStates.push({
+      el:  span,
+      cx:  rect.left + rect.width  / 2,          // viewport-x (stable — no h-scroll)
+      cy:  rect.top  + rect.height / 2 + window.scrollY, // abs-y (add scrollY in tick)
+      dy:  0,   // current vertical displacement (px)
+      vy:  0,   // velocity
+    });
+  });
+}
+
+// ── Use pretext to annotate word spans with precise line numbers ──────
+// This lets us know exactly which line each word sits on without DOM reads
+// inside the hot RAF loop. pretext measures character widths via canvas —
+// the same technique the browser uses, but without triggering layout.
+
+function annotateWithPretext() {
+  if (!prepareWithSegments || !layoutWithLines) return;
+  const mainEl = document.querySelector('main');
+  if (!mainEl) return;
+  const containerW = mainEl.clientWidth - 128; // 64px padding each side
+
+  document.querySelectorAll('[data-animate]').forEach(el => {
+    try {
+      const text   = el.textContent.trim();
+      const font   = '300 18px Inter, sans-serif';
+      const prepared = prepareWithSegments(text, font);
+      const { lines, lineCount } = layoutWithLines(prepared, containerW, 28);
+
+      // Tag the element with pretext's measured line count (useful for debugging
+      // and future per-line effects like wave animations)
+      el.dataset.ptLines  = lineCount;
+      el.dataset.ptWords  = prepared.segments
+        ? prepared.segments.filter(s => s.trim()).length
+        : '?';
+
+      // Walk lines to figure out which rendered word span maps to which line.
+      // We match by ordinal position (word N in text → word span N).
+      const wordSpans = Array.from(el.querySelectorAll('.w'));
+      let spanIdx = 0;
+      lines.forEach((line, lineIdx) => {
+        const wordsOnLine = line.text.trim().split(/\s+/).filter(Boolean);
+        wordsOnLine.forEach(() => {
+          if (wordSpans[spanIdx]) {
+            wordSpans[spanIdx].dataset.line = lineIdx;
+            spanIdx++;
+          }
+        });
+      });
+    } catch (err) {
+      // Non-fatal — animation still works without annotations
+    }
+  });
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  SPRING PHYSICS CONFIG
+// ════════════════════════════════════════════════════════════════════
+
+const RADIUS     = 130;   // px — influence radius
+const LIFT       = 14;    // px — max vertical lift
+const STIFFNESS  = 0.08;  // spring return force
+const DAMPING    = 0.74;  // velocity decay  (0 = no damping, 1 = instant stop)
+
+const prefersReducedMotion =
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ════════════════════════════════════════════════════════════════════
+//  RAF LOOP — cursor lerp + word spring
+// ════════════════════════════════════════════════════════════════════
+
+function tick() {
+  // ── Cursor: exponential lerp for a smooth, slightly lagged feel ──
+  cursorX += (mouseX - cursorX) * 0.10;
+  cursorY += (mouseY - cursorY) * 0.10;
+  cursor.style.left = `${cursorX}px`;
+  cursor.style.top  = `${cursorY}px`;
+
+  // ── Word spring ──────────────────────────────────────────────────
+  if (!prefersReducedMotion && cursorLive) {
+    const scrollY = window.scrollY;
+
+    for (let i = 0; i < wordStates.length; i++) {
+      const w = wordStates[i];
+
+      // Convert word's absolute-y to current viewport-y
+      const wordVY = w.cy - scrollY;
+
+      const dx   = cursorX - w.cx;
+      const dy   = cursorY - wordVY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      const influence = Math.max(0, 1 - dist / RADIUS);
+      const targetDy  = -influence * LIFT;
+
+      // Spring: acceleration toward target, damped velocity
+      w.vy  += (targetDy - w.dy) * STIFFNESS;
+      w.vy  *= DAMPING;
+      w.dy  += w.vy;
+
+      // Only write to DOM if there's meaningful movement
+      if (Math.abs(w.dy) > 0.005 || Math.abs(w.vy) > 0.001) {
+        w.el.style.transform = `translateY(${w.dy.toFixed(2)}px)`;
+      }
+    }
+  }
+
+  requestAnimationFrame(tick);
+}
+
+// ════════════════════════════════════════════════════════════════════
+//  SCROLL — nav active state via IntersectionObserver
+// ════════════════════════════════════════════════════════════════════
+
+const navLinks = document.querySelectorAll('.rail-nav a');
+const sections = document.querySelectorAll('.section');
+
+const navObserver = new IntersectionObserver(entries => {
+  for (const entry of entries) {
+    if (entry.isIntersecting) {
+      navLinks.forEach(a => a.classList.remove('active'));
+      const link = document.querySelector(`.rail-nav a[href="#${entry.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  }
+}, { rootMargin: '-35% 0px -60% 0px' });
+
+sections.forEach(s => navObserver.observe(s));
+
+// ── Section entrance animations ──────────────────────────────────
+const fadeObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('in-view');
+      fadeObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.05 });
+
+sections.forEach(s => fadeObserver.observe(s));
+
+// ════════════════════════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════════════════════════
+
+async function init() {
+  // 1. Wrap words in animated paragraphs
+  document.querySelectorAll('[data-animate]').forEach(wrapWordsIn);
+
+  // 2. Load pretext (non-blocking)
+  const pretextLoaded = await loadPretext();
+
+  // 3. Wait for fonts so measurements are pixel-accurate
+  await document.fonts.ready;
+
+  // 4. If pretext loaded, annotate spans with line numbers
+  if (pretextLoaded) annotateWithPretext();
+
+  // 5. Cache word positions (reads DOM once, avoids thrash in RAF)
+  cacheWordPositions();
+
+  // 6. Start the animation loop
+  requestAnimationFrame(tick);
+
+  // 7. Re-cache on resize (text may reflow → positions change)
+  let resizeTimer;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (pretextLoaded) annotateWithPretext();
+      cacheWordPositions();
+    }, 150);
+  }, { passive: true });
+}
+
+init();
+</script>
+
 </body>
 </html>
