@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #f9f7f2;
+  --ink: #17150e;
+  --muted: #7a7262;
+  --faint: #c0b9a8;
+  --amber: #c48a08;
+  --amber-pale: #fdf4df;
+  --border: #e2dbd0;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-amber: var(--amber);
+  --color-amber-pale: var(--amber-pale);
+  --color-border: var(--border);
+  --font-sans: var(--font-inter);
+  --font-heading: var(--font-syne);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--amber-pale);
+  color: var(--ink);
+}
+
+/* Custom cursor — hide native on pointer devices */
+@media (pointer: fine) {
+  * {
+    cursor: none !important;
+  }
+}
+
+/* Section entrance animation */
+.section-reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.section-reveal.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Custom cursor states */
+.visible {
+  opacity: 1 !important;
+}
+
+.on-link {
+  width: 40px !important;
+  height: 40px !important;
+  background: rgba(196, 138, 8, 0.1) !important;
+  border-color: rgba(196, 138, 8, 0.3) !important;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .section-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
+}

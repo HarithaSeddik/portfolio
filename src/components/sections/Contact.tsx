@@ -1,36 +1,53 @@
-import { contactLinks } from '../../data/contact';
-import { SectionHeader } from '../Section/SectionHeader';
-import styles from './Contact.module.css';
+"use client";
+
+import { useSectionReveal } from "@/lib/use-section-reveal";
 
 export function Contact() {
+  const ref = useSectionReveal();
+
   return (
-    <section className="section" id="contact">
-      <SectionHeader title="Let's talk" num="04 / 04" label="Section 4 of 4" />
-      <p className={styles.intro} data-animate>
-        Open to new opportunities — full-time roles, contract work, or a conversation
-        about something interesting.
-      </p>
-      <div className={styles.links}>
-        {contactLinks.map((link) => (
+    <section
+      ref={ref}
+      id="contact"
+      className="section-reveal px-6 py-24 md:py-32"
+    >
+      <div className="mx-auto max-w-3xl text-center">
+        <p className="mb-2 font-mono text-sm text-amber tracking-wide">
+          04 — Contact
+        </p>
+        <h2 className="font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl">
+          Let&apos;s talk
+        </h2>
+        <p className="mt-4 text-muted md:text-lg">
+          Whether it&apos;s a project, an idea, or just a conversation about
+          what AI can do — I&apos;d love to hear from you.
+        </p>
+
+        <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
           <a
-            key={link.label}
-            href={link.href}
-            className={styles.link}
-            {...(link.external ? { target: '_blank', rel: 'noreferrer' } : {})}
+            href="mailto:akkad.haritha@gmail.com"
+            className="rounded-full bg-ink px-6 py-3 text-sm font-medium text-bg transition-opacity hover:opacity-80"
           >
-            <span className={styles.linkLabel}>{link.label}</span>
-            <span>{link.display}</span>
-            <span className={styles.arrow} aria-hidden="true">→</span>
+            Say hello
           </a>
-        ))}
+          <a
+            href="https://linkedin.com/in/HarithaSeddik"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full border border-border px-6 py-3 text-sm font-medium text-muted transition-colors hover:border-ink hover:text-ink"
+          >
+            LinkedIn
+          </a>
+          <a
+            href="https://github.com/HarithaSeddik"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full border border-border px-6 py-3 text-sm font-medium text-muted transition-colors hover:border-ink hover:text-ink"
+          >
+            GitHub
+          </a>
+        </div>
       </div>
-      <p className={styles.credit}>
-        Text measurement powered by{' '}
-        <a href="https://github.com/chenglou/pretext" target="_blank" rel="noreferrer">
-          @chenglou/pretext
-        </a>{' '}
-        — character-level layout without DOM thrash.
-      </p>
     </section>
   );
 }
