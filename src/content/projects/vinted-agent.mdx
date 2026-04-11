@@ -1,0 +1,34 @@
+---
+title: "Vinted Shopping Agent"
+description: "An AI personal shopper that hunts rare finds on Vinted and automates listings — no API needed. Learns your taste, runs scheduled sweeps, and sends WhatsApp summaries of the best finds."
+date: "2026-03-01"
+tags: ["Claude", "Browser Automation", "Agents", "WhatsApp", "Python"]
+---
+
+## the problem
+
+Vinted has no public API. finding rare or undervalued items means manually refreshing the same searches multiple times a day. selling is equally tedious — writing descriptions, researching prices, uploading photos.
+
+the gap between "there's definitely a deal here" and "i have time to actually find it" is where this agent lives.
+
+## what it does
+
+the agent learns your taste — you describe what a good find looks like (brand, condition, price range, style markers) — then runs automated sweeps through browser automation, no API required.
+
+- scheduled 1–3 sweeps per day using Claude-powered browser automation
+- bookmarks matches and filters out listings you've already seen
+- sends a WhatsApp summary with photos, prices, and links to the best finds
+- assists in preparing sell listings: generates descriptions, suggests pricing, formats photos
+
+it works entirely through the Vinted web UI, which means it handles everything a human would — login, search, pagination, listing detail — without needing official API access.
+
+## patterns used
+
+- **browser automation agent** — Claude driving a headless browser to navigate real web UIs
+- **preference learning** — structured taste profile built from examples and feedback
+- **scheduled task orchestration** — cron-driven sweep cycles
+- **WhatsApp integration** — summary delivery via WhatsApp Business API
+
+---
+
+*this project is in active development. case study will be updated on launch.*

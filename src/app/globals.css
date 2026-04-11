@@ -3,7 +3,7 @@
 :root {
   --bg: #f9f7f2;
   --ink: #17150e;
-  --muted: #7a7262;
+  --muted: #5c5549;
   --faint: #c0b9a8;
   --amber: #c48a08;
   --amber-pale: #fdf4df;
@@ -73,6 +73,100 @@ body {
   height: 40px !important;
   background: rgba(196, 138, 8, 0.1) !important;
   border-color: rgba(196, 138, 8, 0.3) !important;
+}
+
+/* Focus visible */
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+/* MDX case study prose */
+.prose-portfolio {
+  color: var(--muted);
+  font-size: 1.0625rem;
+  line-height: 1.8;
+}
+
+.prose-portfolio h2 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.015em;
+}
+
+.prose-portfolio h3 {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-portfolio p {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+}
+
+.prose-portfolio ul, .prose-portfolio ol {
+  margin-bottom: 1.25rem;
+  padding-left: 1.25rem;
+}
+
+.prose-portfolio li {
+  margin-bottom: 0.4rem;
+}
+
+.prose-portfolio a {
+  color: var(--amber);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prose-portfolio code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--amber-pale);
+  color: var(--ink);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+
+.prose-portfolio pre {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 1.25rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.prose-portfolio pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+.prose-portfolio blockquote {
+  border-left: 3px solid var(--amber);
+  margin-left: 0;
+  padding-left: 1.25rem;
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: 1.25rem;
+}
+
+.prose-portfolio hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5rem 0;
 }
 
 /* Typewriter cursor blink */

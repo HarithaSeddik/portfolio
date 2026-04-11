@@ -1,0 +1,59 @@
+---
+title: "This Portfolio"
+description: "Built with Next.js 16, Tailwind CSS, and Claude Code. A case study in AI-assisted development — and what it actually looks like to build something real with an AI agent."
+date: "2026-04-01"
+tags: ["Next.js", "Tailwind CSS", "Claude Code", "Vercel", "TypeScript"]
+links:
+  github: "https://github.com/HarithaSeddik/portfolio"
+---
+
+## why I built it this way
+
+every developer eventually builds a portfolio. mine had been sitting, embarrassingly outdated, for longer than i'd like to admit. the old one was a react SPA — fine, but not something i was proud of linking to.
+
+when i started rebuilding, i had a choice: spend two weeks agonizing over design systems and component libraries, or use it as a real experiment. i chose the experiment. i wanted to see what it actually felt like to ship something non-trivial with an AI coding agent as my primary collaborator.
+
+so this whole site was built with Claude Code.
+
+## the stack
+
+- **Next.js 16** with the App Router — server components, file-based routing, the works
+- **Tailwind CSS v4** — the new CSS-first config is a genuine improvement
+- **TypeScript** strict mode throughout
+- **Vercel** for deployment — connected to the GitHub repo, preview deploys on every branch push
+- **MDX** for these case study pages — gray-matter for frontmatter, next-mdx-remote for RSC rendering
+
+design tokens live in CSS custom properties. the warm palette (`#f9f7f2` background, `#17150e` ink, `#c48a08` amber) was a deliberate choice — most portfolios go cold and clinical. i wanted something that felt like a warm room.
+
+## what AI-assisted development actually looks like
+
+not magic. more like: having a very fast, very capable collaborator who does the scaffolding while you make the decisions.
+
+the workflow was roughly:
+1. i'd describe what i wanted and why
+2. claude would implement it
+3. i'd look at the output, give feedback, iterate
+
+the interesting part is where the friction lives. AI is fast at boilerplate — layouts, components, hooks — and i spent that saved time on the things that actually matter: copy, personality, the decisions that make a site feel like *me* rather than a template.
+
+the typewriter animation on the hero? that was a back-and-forth. the about section copy went through several rewrites because "generic portfolio voice" kept creeping in. the photo layout for the Beyond Code section took a reference (a portfolio i liked) and a specific ask ("smaller, witty captions like this").
+
+the AI doesn't know what makes *your* site feel right. you do.
+
+## custom cursor
+
+the cursor is a small thing that matters more than it should. it tracks instantly — no lerp lag — with an amber glow that expands on hover. built with a single `useEffect` that directly mutates style (no state, no re-renders).
+
+there's a css media query that hides the native cursor only on pointer devices, so mobile visitors don't see a broken experience.
+
+## what i'd do differently
+
+the MDX setup using `next-mdx-remote` works but adds a package that `@next/mdx` renders unnecessary for most cases. if i were doing this again, i'd go with `@next/mdx` end-to-end and skip the extra dependency.
+
+the scroll-triggered section reveals using Intersection Observer are clean and simple — no library, ~30 lines of code. that was the right call.
+
+## the result
+
+a portfolio i'm actually happy to link to. shipped in a few sessions. built with the tool it's showcasing.
+
+that's the point.

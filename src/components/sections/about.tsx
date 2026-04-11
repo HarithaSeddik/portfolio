@@ -28,7 +28,7 @@ export function About() {
               width={240}
               height={320}
               className="rounded-2xl object-cover"
-              priority={false}
+              priority
             />
           </div>
 

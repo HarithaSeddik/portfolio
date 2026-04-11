@@ -1,0 +1,35 @@
+---
+title: "Halal Stock Screener"
+description: "An AI analyst that filters, researches, and charts stocks end to end — Sharia compliance screening, fundamental analysis, earnings review, and technical charting with entry/exit levels."
+date: "2026-02-01"
+tags: ["AI Agents", "Finance", "Python", "Technical Analysis", "Claude"]
+---
+
+## the problem
+
+evaluating stocks for halal investing is a multi-step, manual process: compliance screening, fundamental analysis, earnings review, analyst signal checks, and technical charting. each stock takes significant time — and the watchlist keeps growing.
+
+most tools either stop at screening (compliance only) or stop at fundamentals (ignoring Sharia constraints entirely). none of them do the full process end to end.
+
+## what it does
+
+the agent takes an unfiltered watchlist collected from various sources and runs every stock through a structured analysis pipeline:
+
+1. **Sharia compliance screening** — filters based on business activity, debt ratios, and income sources
+2. **Fundamental analysis** — P/E ratios, recent earnings, revenue trends, financial health
+3. **Analyst signals** — aggregated sentiment and analyst ratings
+4. **Technical analysis** — support/resistance bands, trend identification, entry and exit levels
+5. **Summary output** — a structured record per qualified stock with rationale and suggested levels
+
+the watchlist is persistent. the agent re-evaluates stocks as conditions change and flags when a position's thesis breaks.
+
+## patterns used
+
+- **multi-step research agent** — sequential, dependent analysis stages per stock
+- **financial data retrieval** — pulling from market data APIs
+- **technical chart analysis** — programmatic TA using Python (pandas-ta, mplfinance)
+- **persistent watchlist management** — stateful tracking across runs
+
+---
+
+*this project is in active development. case study will be updated on launch.*

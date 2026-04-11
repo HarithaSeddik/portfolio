@@ -1,12 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useSectionReveal } from "@/lib/use-section-reveal";
+import { useStaggerReveal } from "@/lib/use-stagger-reveal";
 
 interface Project {
   title: string;
   description: string;
   tags: string[];
-  href?: string;
+  slug?: string;
   status: "live" | "coming-soon";
 }
 
@@ -16,6 +18,7 @@ const projects: Project[] = [
     description:
       "An AI personal shopper that hunts rare finds on Vinted and automates listings — no API needed. Learns your taste, runs scheduled sweeps, and sends WhatsApp summaries of the best finds.",
     tags: ["Claude", "Browser Automation", "Agents", "WhatsApp"],
+    slug: "vinted-agent",
     status: "coming-soon",
   },
   {
@@ -23,6 +26,7 @@ const projects: Project[] = [
     description:
       "An AI analyst that filters, researches, and charts stocks end to end — Sharia compliance screening, fundamental analysis, earnings review, and technical charting with entry/exit levels.",
     tags: ["AI Agents", "Finance", "Python", "Technical Analysis"],
+    slug: "halal-stock-screener",
     status: "coming-soon",
   },
   {
@@ -30,13 +34,14 @@ const projects: Project[] = [
     description:
       "Recruiters automated screening — so we automated applying. Monitors job alerts, evaluates listings against your profile, tailors resumes per application, and submits automatically.",
     tags: ["Claude", "Browser Automation", "Email Parsing", "Agents"],
+    slug: "ai-job-applier",
     status: "coming-soon",
   },
 ];
 
 function ProjectCard({ project }: { project: Project }) {
-  return (
-    <div className="group relative rounded-2xl border border-border/60 bg-bg p-6 transition-all duration-300 hover:border-amber/40 hover:shadow-[0_4px_24px_rgba(196,138,8,0.06)] md:p-8">
+  const inner = (
+    <div className="group relative rounded-2xl border border-border/60 bg-bg p-6 transition-all duration-300 hover:border-amber/40 hover:shadow-[0_4px_24px_rgba(196,138,8,0.06)] md:p-8 h-full">
       {project.status === "coming-soon" && (
         <span className="mb-3 inline-block rounded-full bg-amber-pale px-3 py-1 font-mono text-xs text-amber">
           Coming soon
@@ -58,12 +63,27 @@ function ProjectCard({ project }: { project: Project }) {
           </span>
         ))}
       </div>
+      {project.slug && (
+        <p className="mt-4 font-mono text-xs text-amber transition-opacity group-hover:opacity-70">
+          Read more →
+        </p>
+      )}
     </div>
   );
+
+  if (project.slug) {
+    return (
+      <Link href={`/projects/${project.slug}`} className="block h-full">
+        {inner}
+      </Link>
+    );
+  }
+  return inner;
 }
 
 export function Projects() {
   const ref = useSectionReveal();
+  const gridRef = useStaggerReveal(100);
 
   return (
     <section
@@ -83,9 +103,11 @@ export function Projects() {
           engineering and generative AI.
         </p>
 
-        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div ref={gridRef} className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {projects.map((project) => (
-            <ProjectCard key={project.title} project={project} />
+            <div key={project.title} data-stagger>
+              <ProjectCard project={project} />
+            </div>
           ))}
         </div>
       </div>

@@ -37,12 +37,12 @@
 
 ---
 
-## Phase 2: Landing Page Sections
+## Phase 2: Landing Page Sections ✅
 
 ### 2.1 Hero
 - [x] Tagline: **"Software engineer exploring what happens when you give your code a brain."**
 - [x] **Typewriter animation** — cycles through: "Haritha Seddik", "Software Engineer", "AI Automation Specialist", "Adventurer", "Curious Learner" with blinking cursor, infinite loop
-- [ ] Integrate `pretext` library for hero headline character animation (Phase 4)
+- [x] ~~Integrate `pretext` library for hero headline character animation~~ — deferred to Phase 5 (pretext requires research; typewriter covers the need)
 - [x] Generous whitespace — let the hero breathe
 - [x] CTA buttons: "See what I'm building" + "Get in touch"
 
@@ -51,16 +51,17 @@
 - [x] Story arc: mechanical engineering → R&D → mobile → backend → Gen.AI
 - [x] Concise (3-4 short paragraphs)
 - [x] Personal touches (multilingual, Istanbul/Hanover)
-- [ ] **Headshot photo** alongside narrative text (`my_photos/head_shot_photo.jpeg`)
+- [x] **Headshot photo** alongside narrative text — `public/images/headshot.jpeg`
 
 ### 2.3 Projects (Cards)
 - [x] Responsive grid of project cards
-- [ ] Replace placeholders with featured AI projects:
+- [x] Replace placeholders with featured AI projects:
   1. **Vinted Shopping Agent** — AI personal shopper via browser automation
   2. **Halal Stock Screener & Analyst** — Multi-step research agent for Sharia-compliant investing
   3. **AI Job Applier** — Automated job applications with tailored resumes
-- [ ] Status badges (coming soon)
+- [x] Status badges (coming soon)
 - [x] Subtle hover animation on cards
+- [x] Cards link to MDX case study pages (`/projects/[slug]`)
 - Remaining projects (Website Redesign, Content Pipeline, Market Digest) → full projects page later
 
 ### 2.4 Tech Stack Visualization
@@ -73,58 +74,55 @@
 - [x] Warm closing line
 - [x] No contact form in MVP
 
-### 2.6 Beyond Code (NEW)
-- [ ] Dedicated section between TechStack and Contact
-- [ ] Short intro: "When I'm not coding..."
-- [ ] Photo grid (responsive: 2 cols mobile, 3 cols desktop)
-- [ ] 5 hobby/adventure photos via `next/image`:
-  - Indoor bouldering
-  - Outdoor rock climbing (belaying + scaling)
-  - Hiking in the Alps
-  - Mountaineering (summit at sunset)
-- [ ] Uses `useSectionReveal` hook
+### 2.6 Beyond Code
+- [x] Dedicated section between TechStack and Contact
+- [x] Short intro: "When I'm not coding..."
+- [x] 5 hobby/adventure photos — small cards with witty captions (DAA-style)
+- [x] Uses `useSectionReveal` hook
 
 ---
 
-## Phase 3: Project Case Study Pages
+## Phase 3: Project Case Study Pages ✅
 
-- [ ] Configure MDX support (`@next/mdx` or `next-mdx-remote`)
-- [ ] Define frontmatter schema: title, description, date, tags, thumbnail, links
-- [ ] Build case study page template:
+- [x] Configure MDX support (`next-mdx-remote` for RSC + `gray-matter` for frontmatter)
+- [x] Define frontmatter schema: title, description, date, tags, thumbnail, links
+- [x] Build case study page template (`src/app/projects/[slug]/page.tsx`):
   - Project hero (title, description, date, tech tags)
   - MDX body (problem, approach, implementation, outcomes)
-  - Media support (screenshots, diagrams, code snippets)
-  - Back to projects / next-previous navigation
-  - Clean typography for long-form reading (generous line-height, max-width)
-- [ ] Write case study for "this portfolio" as first project
-- [ ] Create placeholder entries for AI agent projects (content in `src/content/project-ideas.md`)
+  - Back to projects link
+  - Clean typography for long-form reading (`prose-portfolio` CSS class)
+  - `generateMetadata` per page
+- [x] Write case study for "this portfolio" — `src/content/projects/portfolio.mdx`
+- [x] MDX stubs for 3 AI agent projects (Vinted Agent, Halal Screener, AI Job Applier)
+- [x] Project cards link to case study pages
 
 ---
 
 ## Phase 4: Polish & Production
 
-### 4.1 SEO & Metadata
-- [ ] Dynamic `generateMetadata` for all pages
-- [ ] OG images (static or generated with `@vercel/og`)
-- [ ] `robots.txt` and `sitemap.xml`
-- [ ] Structured data (JSON-LD person schema)
+### 4.1 SEO & Metadata ✅
+- [x] Dynamic `generateMetadata` for case study pages
+- [ ] OG images (static or `@vercel/og`) — deferred, low priority
+- [x] `robots.ts` and `sitemap.ts`
+- [x] Structured data (JSON-LD person schema in root layout)
 
-### 4.2 Animations
+### 4.2 Animations ✅
 - [x] Custom cursor — instant tracking, no lerp lag
-- [ ] Hero entrance animation with pretext (word-by-word or character reveal)
+- [x] ~~Hero entrance animation with pretext~~ — deferred to Phase 5
 - [x] Scroll-triggered section reveals (Intersection Observer)
-- [ ] Project card entrance animations (progressive disclosure as you scroll)
-- [ ] Subtle hover states on interactive elements (cubic-bezier easing)
+- [x] Project card entrance animations — staggered fade-in + slide-up via `useStaggerReveal` hook
+- [x] Subtle hover states on interactive elements (cubic-bezier easing)
 - [x] `prefers-reduced-motion` support
 
-### 4.3 Performance & Accessibility
-- [ ] Image optimization via `next/image`
+### 4.3 Performance & Accessibility ✅
+- [x] Image optimization via `next/image` — all images audited with proper width/height/sizes/alt
+- [x] Headshot `priority` flag set (above-the-fold)
 - [x] Font optimization via `next/font`
 - [ ] Lighthouse audit — target 90+ across all metrics
 - [x] Semantic HTML throughout
-- [ ] Keyboard navigation
-- [ ] Focus indicators
-- [ ] Color contrast compliance
+- [x] Keyboard navigation — all interactive elements focusable
+- [x] Focus indicators — amber `:focus-visible` outline in globals.css
+- [x] Color contrast compliance — `--muted` darkened to `#5c5549` (6.88:1 ratio)
 
 ---
 
@@ -136,6 +134,8 @@
 - [ ] **Multi-language (Turkish)** — i18n support
 - [ ] **Custom domain** — configure when purchased
 - [ ] **GitHub activity integration** — API-powered feed
+- [ ] **pretext hero animation** — character-level reveal on hero headline
+- [ ] **OG image generation** — `@vercel/og` dynamic images per page
 
 ---
 
