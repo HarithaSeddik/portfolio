@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRef, useState, useCallback } from "react";
 import { useSectionReveal } from "@/lib/use-section-reveal";
 
 const photos = [
@@ -31,8 +32,33 @@ const photos = [
   },
 ];
 
+const MAX_SCALE = 1.4;
+const RANGE = 160;
+
 export function BeyondCode() {
   const ref = useSectionReveal();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [scales, setScales] = useState<number[]>(photos.map(() => 1));
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const newScales = itemRefs.current.map((el) => {
+      if (!el) return 1;
+      const rect = el.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dist = Math.sqrt((e.clientX - cx) ** 2 + (e.clientY - cy) ** 2);
+      if (dist >= RANGE) return 1;
+      const t = 1 - dist / RANGE;
+      const scale = 1 + (MAX_SCALE - 1) * Math.pow(t, 1.4);
+      return Math.min(scale, MAX_SCALE);
+    });
+    setScales(newScales);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    setScales(photos.map(() => 1));
+  }, []);
 
   return (
     <section
@@ -52,9 +78,24 @@ export function BeyondCode() {
           somewhere.
         </p>
 
-        <div className="mt-12 flex flex-wrap justify-center gap-5 md:gap-6">
-          {photos.map((photo) => (
-            <div key={photo.src} className="w-36 shrink-0 md:w-44">
+        <div
+          ref={containerRef}
+          className="mt-12 flex flex-wrap justify-center gap-5 md:gap-6"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        >
+          {photos.map((photo, i) => (
+            <div
+              key={photo.src}
+              ref={(el) => { itemRefs.current[i] = el; }}
+              className="w-36 shrink-0 md:w-44"
+              style={{
+                transform: `scale(${scales[i]})`,
+                transition: "transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                transformOrigin: "bottom center",
+                zIndex: scales[i] > 1.1 ? 10 : 1,
+              }}
+            >
               <div className="aspect-[3/4] overflow-hidden rounded-lg">
                 <Image
                   src={photo.src}

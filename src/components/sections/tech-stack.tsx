@@ -11,34 +11,24 @@ interface StackCategory {
 const stack: StackCategory[] = [
   {
     label: "AI & Gen.AI",
-    items: [
-      "Claude Code",
-      "AI SDK",
-      "LLM Agents",
-      "Prompt Engineering",
-      "Python",
-    ],
+    items: ["Claude / AI SDK", "LLM Agents", "Prompt Engineering", "Python"],
     highlight: true,
   },
   {
     label: "Mobile",
-    items: ["Flutter", "Dart", "iOS", "Android", "BLoC"],
+    items: ["Flutter", "iOS", "Android"],
   },
   {
     label: "Backend",
-    items: ["Java", "Spring Boot", "Kafka", "REST APIs", "SQL"],
+    items: ["Java / Spring Boot", "Kafka", "REST APIs"],
   },
   {
     label: "Frontend",
-    items: ["React", "Next.js", "TypeScript", "Tailwind CSS"],
+    items: ["Next.js / React", "TypeScript", "Tailwind CSS"],
   },
   {
-    label: "DevOps & Tools",
-    items: ["Kubernetes", "Jenkins", "TeamCity", "CI/CD", "Git"],
-  },
-  {
-    label: "Data",
-    items: ["Pandas", "NumPy", "Jupyter", "SQLite", "PostgreSQL"],
+    label: "DevOps",
+    items: ["Kubernetes", "Jenkins", "CI/CD"],
   },
 ];
 

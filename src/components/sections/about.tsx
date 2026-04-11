@@ -13,21 +13,30 @@ export function About() {
       className="section-reveal px-6 py-24 md:py-32"
     >
       <div className="mx-auto max-w-4xl">
-        <p className="mb-2 font-mono text-sm text-amber tracking-wide">
+        <p
+          className="reveal-item mb-2 font-mono text-sm text-amber tracking-wide"
+          style={{ "--reveal-delay": "0ms" } as React.CSSProperties}
+        >
           01 — About
         </p>
-        <h2 className="font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl">
+        <h2
+          className="reveal-item font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl"
+          style={{ "--reveal-delay": "80ms" } as React.CSSProperties}
+        >
           The short version
         </h2>
 
-        <div className="mt-10 flex flex-col items-start gap-10 md:flex-row">
-          <div className="shrink-0">
+        <div
+          className="reveal-item mt-10 flex flex-col items-start gap-10 md:flex-row"
+          style={{ "--reveal-delay": "180ms" } as React.CSSProperties}
+        >
+          <div className="relative shrink-0 w-[220px] self-stretch min-h-[280px]">
             <Image
               src="/images/headshot.jpeg"
               alt="Haritha Akkad"
-              width={240}
-              height={320}
-              className="rounded-2xl object-cover"
+              fill
+              className="rounded-2xl object-cover object-top"
+              sizes="220px"
               priority
             />
           </div>
