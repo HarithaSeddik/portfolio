@@ -12,24 +12,24 @@ interface Project {
 
 const projects: Project[] = [
   {
-    title: "This Portfolio",
+    title: "Vinted Shopping Agent",
     description:
-      "Built entirely with Claude Code + Next.js + Vercel. A meta-showcase of AI-assisted development — from planning to deployment, every step was a collaboration with AI.",
-    tags: ["Next.js", "TypeScript", "Tailwind", "Claude Code", "Vercel"],
-    status: "live",
-  },
-  {
-    title: "AI Automation Toolkit",
-    description:
-      "A collection of automation tools powered by LLMs for real-world developer workflows. Code review agents, documentation generators, and more.",
-    tags: ["Python", "Claude API", "Agents", "Automation"],
+      "An AI personal shopper that hunts rare finds on Vinted and automates listings — no API needed. Learns your taste, runs scheduled sweeps, and sends WhatsApp summaries of the best finds.",
+    tags: ["Claude", "Browser Automation", "Agents", "WhatsApp"],
     status: "coming-soon",
   },
   {
-    title: "Gen.AI Dev Workflows",
+    title: "Halal Stock Screener",
     description:
-      "Exploring how generative AI transforms software development — from agentic coding to AI-assisted architecture decisions. Case studies and tools.",
-    tags: ["AI SDK", "Vercel", "Claude", "Developer Tools"],
+      "An AI analyst that filters, researches, and charts stocks end to end — Sharia compliance screening, fundamental analysis, earnings review, and technical charting with entry/exit levels.",
+    tags: ["AI Agents", "Finance", "Python", "Technical Analysis"],
+    status: "coming-soon",
+  },
+  {
+    title: "AI Job Applier",
+    description:
+      "Recruiters automated screening — so we automated applying. Monitors job alerts, evaluates listings against your profile, tailors resumes per application, and submits automatically.",
+    tags: ["Claude", "Browser Automation", "Email Parsing", "Agents"],
     status: "coming-soon",
   },
 ];

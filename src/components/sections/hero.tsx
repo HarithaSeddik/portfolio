@@ -1,9 +1,79 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
+
+const words = [
+  "Haritha Seddik",
+  "Software Engineer",
+  "AI Automation Specialist",
+  "Adventurer",
+  "Curious Learner",
+];
+
+const TYPING_SPEED = 80;
+const DELETING_SPEED = 50;
+const PAUSE_AFTER_TYPED = 2000;
+const PAUSE_AFTER_DELETED = 500;
+
+function useTypewriter(items: string[]) {
+  const [text, setText] = useState("");
+  const [wordIndex, setWordIndex] = useState(0);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mq.matches);
+    const handler = (e: MediaQueryListEvent) =>
+      setPrefersReducedMotion(e.matches);
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
+  }, []);
+
+  const tick = useCallback(() => {
+    const currentWord = items[wordIndex];
+
+    if (isDeleting) {
+      setText(currentWord.substring(0, text.length - 1));
+    } else {
+      setText(currentWord.substring(0, text.length + 1));
+    }
+  }, [items, wordIndex, text, isDeleting]);
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setText(items[0]);
+      return;
+    }
+
+    const currentWord = items[wordIndex];
+
+    let delay: number;
+
+    if (!isDeleting && text === currentWord) {
+      delay = PAUSE_AFTER_TYPED;
+      const timeout = setTimeout(() => setIsDeleting(true), delay);
+      return () => clearTimeout(timeout);
+    } else if (isDeleting && text === "") {
+      delay = PAUSE_AFTER_DELETED;
+      const timeout = setTimeout(() => {
+        setIsDeleting(false);
+        setWordIndex((prev) => (prev + 1) % items.length);
+      }, delay);
+      return () => clearTimeout(timeout);
+    } else {
+      delay = isDeleting ? DELETING_SPEED : TYPING_SPEED;
+      const timeout = setTimeout(tick, delay);
+      return () => clearTimeout(timeout);
+    }
+  }, [text, isDeleting, wordIndex, items, tick, prefersReducedMotion]);
+
+  return text;
+}
 
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const displayText = useTypewriter(words);
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -22,12 +92,12 @@ export function Hero() {
           Hello, I&apos;m
         </p>
         <h1 className="font-heading text-5xl font-bold leading-tight tracking-tight text-ink md:text-7xl">
-          Haritha Akkad
+          <span>{displayText}</span>
+          <span className="typewriter-cursor ml-0.5 text-amber">|</span>
         </h1>
         <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted md:text-xl">
-          Senior software engineer exploring the edge of what&apos;s possible
-          with generative AI. From mobile apps to backend systems to building
-          with agents — I follow the curiosity.
+          Software engineer exploring what happens when you give your code a
+          brain.
         </p>
         <div className="mt-10 flex gap-4">
           <a

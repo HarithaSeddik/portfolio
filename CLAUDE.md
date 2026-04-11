@@ -62,7 +62,7 @@ src/
 - **Never auto-commit** — only commit when explicitly asked
 - **Always run `npm run build`** before considering a task complete
 - **Vercel preview deploys** are the source of truth for visual verification
-- Reference `PLAN.md` for current phase and task tracking
+- **`PLAN.md` is the single source of truth** — it must ALWAYS be up to date. Before starting any work, check PLAN.md to see where we are. After completing work or making new decisions, update PLAN.md immediately. Every implementation task should trace back to a section in PLAN.md. If it doesn't exist there yet, add it before executing.
 - Mark completed tasks with `[x]` in PLAN.md as work progresses
 
 ## Content Management

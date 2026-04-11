@@ -75,6 +75,16 @@ body {
   border-color: rgba(196, 138, 8, 0.3) !important;
 }
 
+/* Typewriter cursor blink */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.typewriter-cursor {
+  animation: blink 0.8s step-end infinite;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .section-reveal {
@@ -85,5 +95,9 @@ body {
 
   html {
     scroll-behavior: auto;
+  }
+
+  .typewriter-cursor {
+    animation: none;
   }
 }

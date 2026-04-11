@@ -19,72 +19,70 @@
 
 ---
 
-## Phase 1: Foundation
+## Phase 1: Foundation ✅
 
-- [ ] Create new branch `feature/portfolio-v2` from `main`
-- [ ] Initialize Next.js 16 (App Router) with TypeScript
-- [ ] Configure `next.config.ts` and `vercel.json` (or `vercel.ts`)
-- [ ] Set up project folder structure:
-  - `src/app/` — pages and layouts
-  - `src/components/layout/` — Header, Footer, Nav, MobileNav
-  - `src/components/sections/` — Hero, About, Projects, TechStack, Contact
-  - `src/components/ui/` — Reusable primitives (Button, Card, Tag)
-  - `src/content/projects/` — MDX project files
-  - `src/lib/` — Fonts, metadata, utilities
-  - `src/styles/` — Global CSS, design tokens
-- [ ] Install and configure Tailwind CSS
-- [ ] Set up design tokens (CSS custom properties):
-  - Warm color palette (`--bg: #f9f7f2`, `--ink: #17150e`, `--muted: #7a7262`, `--amber: #c48a08`, etc.)
-  - Muted text colors (never pure black — use dark browns/grays)
-  - Spacing scale (4px base grid)
-  - Typography scale
-- [ ] Configure fonts: Syne (headings) + Inter (body) + monospace (code/tech)
-- [ ] Build root layout (`layout.tsx`) with metadata, fonts, global styles
-- [ ] Build minimal header with nav (smooth scroll on landing, page links for sub-pages)
-- [ ] Build footer (social links, copyright)
-- [ ] Verify Vercel preview deploys work on the new branch
-- [ ] Responsive layout shell working on mobile, tablet, desktop
+- [x] Create new branch `feature/portfolio-v2` from `feature/setup-claude-md`
+- [x] Initialize Next.js 16 (App Router) with TypeScript
+- [x] Configure `next.config.ts`
+- [x] Set up project folder structure
+- [x] Install and configure Tailwind CSS
+- [x] Set up design tokens (CSS custom properties): warm color palette, muted text, spacing scale
+- [x] Configure fonts: Syne (headings) + Inter (body) + JetBrains Mono (code/tech)
+- [x] Build root layout (`layout.tsx`) with metadata, fonts, global styles
+- [x] Build minimal header with nav (smooth scroll on landing)
+- [x] Build footer (social links, copyright)
+- [x] Custom cursor — instant tracking, no lerp lag, amber glow, grows on hover
+- [x] Verify Vercel preview deploys work on the branch
+- [x] Responsive layout shell working on mobile, tablet, desktop
 
 ---
 
 ## Phase 2: Landing Page Sections
 
 ### 2.1 Hero
-- [ ] Name and positioning tagline (conversational, not formal)
-- [ ] Brief one-liner about the AI transition
-- [ ] Integrate `pretext` library for hero headline character animation (text reveal, like Daniyal's word-by-word entrance)
-- [ ] Generous whitespace — let the hero breathe
-- [ ] CTA: subtle, not aggressive — "See what I'm building" or similar
+- [x] Tagline: **"Software engineer exploring what happens when you give your code a brain."**
+- [x] **Typewriter animation** — cycles through: "Haritha Seddik", "Software Engineer", "AI Automation Specialist", "Adventurer", "Curious Learner" with blinking cursor, infinite loop
+- [ ] Integrate `pretext` library for hero headline character animation (Phase 4)
+- [x] Generous whitespace — let the hero breathe
+- [x] CTA buttons: "See what I'm building" + "Get in touch"
 
 ### 2.2 About / Journey
-- [ ] Casual, personal tone — "I'm a..." opening (Tamara-style)
-- [ ] Soft journey narrative woven in: mechanical engineering → R&D → mobile → backend → Gen.AI
-- [ ] NOT a resume recap — show the arc, the curiosity, the evolution
-- [ ] Concise (3-4 short paragraphs max)
-- [ ] Personal touches (multilingual, Istanbul/Hanover, interests)
-- [ ] Generous spacing between paragraphs — relaxed reading pace
+- [x] Casual, personal tone — journey narrative
+- [x] Story arc: mechanical engineering → R&D → mobile → backend → Gen.AI
+- [x] Concise (3-4 short paragraphs)
+- [x] Personal touches (multilingual, Istanbul/Hanover)
+- [ ] **Headshot photo** alongside narrative text (`my_photos/head_shot_photo.jpeg`)
 
 ### 2.3 Projects (Cards)
-- [ ] Responsive grid of project cards (1-2-3 columns)
-- [ ] Each card: title, short description, tech tags, thumbnail/visual
-- [ ] Cards link to `/projects/[slug]` for full case study
-- [ ] Placeholder projects (portfolio itself + 2-3 planned AI projects)
-- [ ] Scroll-triggered entrance animation (fade-up as cards enter viewport)
-- [ ] Subtle hover animation on cards
+- [x] Responsive grid of project cards
+- [ ] Replace placeholders with featured AI projects:
+  1. **Vinted Shopping Agent** — AI personal shopper via browser automation
+  2. **Halal Stock Screener & Analyst** — Multi-step research agent for Sharia-compliant investing
+  3. **AI Job Applier** — Automated job applications with tailored resumes
+- [ ] Status badges (coming soon)
+- [x] Subtle hover animation on cards
+- Remaining projects (Website Redesign, Content Pipeline, Market Digest) → full projects page later
 
 ### 2.4 Tech Stack Visualization
-- [ ] Visual representation of skills/tools
-- [ ] Grouped by category: Languages, Frameworks, AI/ML, Tools, Cloud
-- [ ] AI/Gen.AI tools prominently highlighted (steer the narrative)
-- [ ] Clean grid with icons or creative visualization
-- [ ] Include tools from resume + new AI tools (Claude, Vercel AI SDK, etc.)
+- [x] Visual representation grouped by category
+- [x] AI/Gen.AI tools prominently highlighted
+- [x] Clean grid layout
 
 ### 2.5 Contact / CTA
-- [ ] Clear but relaxed call-to-action section
-- [ ] Email link, LinkedIn, GitHub
-- [ ] Optional: "Download CV" button
-- [ ] No contact form in MVP (keep it simple)
-- [ ] Warm closing line — personality, not corporate
+- [x] Email link, LinkedIn, GitHub
+- [x] Warm closing line
+- [x] No contact form in MVP
+
+### 2.6 Beyond Code (NEW)
+- [ ] Dedicated section between TechStack and Contact
+- [ ] Short intro: "When I'm not coding..."
+- [ ] Photo grid (responsive: 2 cols mobile, 3 cols desktop)
+- [ ] 5 hobby/adventure photos via `next/image`:
+  - Indoor bouldering
+  - Outdoor rock climbing (belaying + scaling)
+  - Hiking in the Alps
+  - Mountaineering (summit at sunset)
+- [ ] Uses `useSectionReveal` hook
 
 ---
 
@@ -99,7 +97,7 @@
   - Back to projects / next-previous navigation
   - Clean typography for long-form reading (generous line-height, max-width)
 - [ ] Write case study for "this portfolio" as first project
-- [ ] Create 2-3 placeholder entries for planned AI projects
+- [ ] Create placeholder entries for AI agent projects (content in `src/content/project-ideas.md`)
 
 ---
 
@@ -112,18 +110,18 @@
 - [ ] Structured data (JSON-LD person schema)
 
 ### 4.2 Animations
-- [ ] Custom cursor from POC — same visual style + character-push physics, but **no lerp lag** (set cursor position directly to mouse coordinates instead of exponential interpolation)
+- [x] Custom cursor — instant tracking, no lerp lag
 - [ ] Hero entrance animation with pretext (word-by-word or character reveal)
-- [ ] Scroll-triggered section reveals (Intersection Observer, fade-up with stagger)
+- [x] Scroll-triggered section reveals (Intersection Observer)
 - [ ] Project card entrance animations (progressive disclosure as you scroll)
-- [ ] Subtle hover states on interactive elements (cubic-bezier easing, like Franulovic)
-- [ ] `prefers-reduced-motion` support
+- [ ] Subtle hover states on interactive elements (cubic-bezier easing)
+- [x] `prefers-reduced-motion` support
 
 ### 4.3 Performance & Accessibility
 - [ ] Image optimization via `next/image`
-- [ ] Font optimization via `next/font`
+- [x] Font optimization via `next/font`
 - [ ] Lighthouse audit — target 90+ across all metrics
-- [ ] Semantic HTML throughout
+- [x] Semantic HTML throughout
 - [ ] Keyboard navigation
 - [ ] Focus indicators
 - [ ] Color contrast compliance
@@ -145,7 +143,7 @@
 
 - [x] Updated resume (saved to CLAUDE.md as internal reference — not served as static asset)
 - [x] Inspiration portfolio links (analyzed and incorporated into design philosophy)
-- [ ] Project ideas/descriptions for case study placeholders
+- [x] Project ideas/descriptions — 6 AI agent projects documented in `src/content/project-ideas.md`
 - [ ] Domain name (when purchased)
-- [ ] Headshot / personal photo (optional, for About section)
-- [ ] Hero tagline / copy preferences
+- [x] Headshot / personal photos — `my_photos/head_shot_photo.jpeg` + 5 hobby/adventure photos
+- [x] Hero tagline — "Software engineer exploring what happens when you give your code a brain."
