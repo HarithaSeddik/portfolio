@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRef, useEffect } from "react";
 import { useSectionReveal } from "@/lib/use-section-reveal";
 import { useStaggerReveal } from "@/lib/use-stagger-reveal";
 
@@ -39,46 +40,124 @@ const projects: Project[] = [
   },
 ];
 
+function useTilt(ref: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const card = ref.current;
+    if (!card) return;
+
+    const mq = window.matchMedia("(pointer: coarse)");
+    if (mq.matches) return; // skip touch devices
+
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (prefersReduced) return;
+
+    const glare = card.querySelector<HTMLElement>(".card-glare");
+    const inner = card.querySelector<HTMLElement>(".card-inner");
+    let rafId: number;
+
+    const onMove = (e: MouseEvent) => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const rect = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - 0.5;
+        const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+        card.style.transform = `perspective(900px) rotateX(${-y * 9}deg) rotateY(${x * 9}deg)`;
+
+        if (glare) {
+          glare.style.background = `radial-gradient(circle at ${(x + 0.5) * 100}% ${(y + 0.5) * 100}%, rgba(255,255,255,0.13) 0%, transparent 65%)`;
+          glare.style.opacity = "1";
+        }
+        if (inner) {
+          inner.style.transform = `translateX(${x * -5}px) translateY(${y * -5}px)`;
+        }
+      });
+    };
+
+    const onEnter = () => {
+      card.style.transition = "box-shadow 0.3s ease";
+      card.style.boxShadow = "0 24px 48px rgba(23,21,14,0.12), 0 8px 16px rgba(23,21,14,0.06)";
+    };
+
+    const onLeave = () => {
+      cancelAnimationFrame(rafId);
+      card.style.transition = "transform 0.55s cubic-bezier(0.23,1,0.32,1), box-shadow 0.55s ease";
+      card.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
+      card.style.boxShadow = "";
+      if (glare) glare.style.opacity = "0";
+      if (inner) {
+        inner.style.transition = "transform 0.55s cubic-bezier(0.23,1,0.32,1)";
+        inner.style.transform = "translateX(0) translateY(0)";
+      }
+    };
+
+    card.addEventListener("mousemove", onMove);
+    card.addEventListener("mouseenter", onEnter);
+    card.addEventListener("mouseleave", onLeave);
+    return () => {
+      cancelAnimationFrame(rafId);
+      card.removeEventListener("mousemove", onMove);
+      card.removeEventListener("mouseenter", onEnter);
+      card.removeEventListener("mouseleave", onLeave);
+    };
+  }, [ref]);
+}
+
 function ProjectCard({ project }: { project: Project }) {
-  const inner = (
-    <div className="group relative rounded-2xl border border-border/60 bg-bg p-6 transition-all duration-300 hover:border-amber/40 hover:shadow-[0_4px_24px_rgba(196,138,8,0.06)] md:p-8 h-full">
-      {project.status === "coming-soon" && (
-        <span className="mb-3 inline-block rounded-full bg-amber-pale px-3 py-1 font-mono text-xs text-amber">
-          Coming soon
-        </span>
-      )}
-      <h3 className="font-heading text-xl font-semibold text-ink">
-        {project.title}
-      </h3>
-      <p className="mt-3 text-sm leading-relaxed text-muted">
-        {project.description}
-      </p>
-      <div className="mt-5 flex flex-wrap gap-2">
-        {project.tags.map((tag) => (
-          <span
-            key={tag}
-            className="rounded-full border border-border px-3 py-1 font-mono text-xs text-muted"
-          >
-            {tag}
+  const cardRef = useRef<HTMLDivElement>(null);
+  useTilt(cardRef);
+
+  const body = (
+    <div
+      ref={cardRef}
+      className="relative h-full rounded-2xl border border-border/60 bg-bg overflow-hidden"
+      style={{ willChange: "transform" }}
+    >
+      {/* glare overlay */}
+      <div
+        className="card-glare pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 z-10"
+        aria-hidden="true"
+      />
+      {/* inner content — shifts opposite to tilt */}
+      <div className="card-inner p-6 md:p-8 h-full flex flex-col">
+        {project.status === "coming-soon" && (
+          <span className="mb-3 inline-block self-start rounded-full bg-amber-pale px-3 py-1 font-mono text-xs text-amber">
+            Coming soon
           </span>
-        ))}
-      </div>
-      {project.slug && (
-        <p className="mt-4 font-mono text-xs text-amber transition-opacity group-hover:opacity-70">
-          Read more →
+        )}
+        <h3 className="font-heading text-xl font-semibold text-ink">
+          {project.title}
+        </h3>
+        <p className="mt-3 text-sm leading-relaxed text-muted flex-1">
+          {project.description}
         </p>
-      )}
+        <div className="mt-5 flex flex-wrap gap-2">
+          {project.tags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded-full border border-border px-3 py-1 font-mono text-xs text-muted"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+        {project.slug && (
+          <p className="mt-4 font-mono text-xs text-amber">Read more →</p>
+        )}
+      </div>
     </div>
   );
 
   if (project.slug) {
     return (
       <Link href={`/projects/${project.slug}`} className="block h-full">
-        {inner}
+        {body}
       </Link>
     );
   }
-  return inner;
+  return body;
 }
 
 export function Projects() {
@@ -103,7 +182,10 @@ export function Projects() {
           engineering and generative AI.
         </p>
 
-        <div ref={gridRef} className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div
+          ref={gridRef}
+          className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+        >
           {projects.map((project) => (
             <div key={project.title} data-stagger>
               <ProjectCard project={project} />

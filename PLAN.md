@@ -112,7 +112,33 @@
 - [x] Scroll-triggered section reveals (Intersection Observer)
 - [x] Project card entrance animations — staggered fade-in + slide-up via `useStaggerReveal` hook
 - [x] Subtle hover states on interactive elements (cubic-bezier easing)
+- [x] Hero scroll parallax — content drifts + fades as you scroll past
+- [x] Hero tagline word-reveal (pretext-style, per-word clip animation)
+- [x] Beyond Code dock animation — proximity-based photo magnification
+- [x] Staggered `.reveal-item` pattern for per-element reveals within sections
 - [x] `prefers-reduced-motion` support
+
+### 4.4 Advanced Animations (New) 🚧
+
+#### Project Card 3D Tilt Parallax
+> Inspired by YouTube reference (youtu.be/0ITA_pwfzDE ~17s). A mouse-follow 3D perspective tilt on hover — the card rotates subtly on X/Y axes as the cursor moves across it, creating a depth illusion with an inner highlight that tracks the cursor.
+
+- [ ] **3D tilt effect on project cards** — `onMouseMove` handler calculates cursor position relative to card center, applies `perspective(800px) rotateX(Ydeg) rotateY(Xdeg)`. Max ±8° rotation — premium feel, not gimmicky.
+- [ ] **Cursor-tracked inner glare** — radial gradient overlay (white, ~15% opacity) that repositions as the cursor moves across the card. Amber tint variant to match the palette.
+- [ ] **Inner content parallax** — card title and tags shift slightly *opposite* to the tilt direction (3–5px), reinforcing the depth illusion (like content floating above the card surface).
+- [ ] **Spring reset on mouse leave** — card returns to flat with `transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1)` (fast deceleration, no overshoot).
+- [ ] `will-change: transform` for GPU compositing, disabled on touch devices.
+- [ ] Respects `prefers-reduced-motion` — no tilt, glare, or inner movement if enabled.
+
+#### Inter-Section Scroll Parallax
+> As you scroll between sections, elements move at layered speeds — the page breathes with depth, like pages in a physical book. Minimalistic but creates a strong sense of quality.
+
+- [ ] **Section label parallax** — the amber monospace labels (`01 — About`, `02 — Projects` etc.) scroll at ~75% speed. As the section approaches center viewport, labels arrive naturally; as it exits upward, they drift ahead of the content.
+- [ ] **Headings at 85% scroll speed** — subtly slower than body copy, reinforcing hierarchy and depth perception.
+- [ ] **Scroll progress sidebar** — a thin vertical amber line on the left (desktop only) that tracks scroll progress through the page sections, with a small dot at the active section. Fade in after hero, fade out at footer.
+- [ ] **Transition breathing rooms** — add a subtle horizontal rule or decorative amber dot between chapters that has its own parallax (moves at 60% scroll speed, appears to float between sections).
+- [ ] Implementation approach: single `useScrollParallax` hook — one passive `scroll` event listener, sections registered via `IntersectionObserver`, offsets computed via `getBoundingClientRect()` relative to viewport center. Apply transforms via direct DOM style mutation (no setState) for 60fps.
+- [ ] Respects `prefers-reduced-motion` — all parallax offsets clamped to zero.
 
 ### 4.3 Performance & Accessibility ✅
 - [x] Image optimization via `next/image` — all images audited with proper width/height/sizes/alt
