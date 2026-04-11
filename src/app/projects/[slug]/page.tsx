@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getAllProjects, getProject } from "@/lib/projects";
+import { buildOgUrl } from "@/lib/metadata";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import type { Metadata } from "next";
 
@@ -16,9 +17,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) return {};
+  const title = `${project.meta.title} — Haritha Akkad`;
   return {
-    title: `${project.meta.title} — Haritha Akkad`,
+    title,
     description: project.meta.description,
+    openGraph: {
+      title,
+      description: project.meta.description,
+      images: [
+        {
+          url: buildOgUrl(project.meta.title, project.meta.description),
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+    twitter: { card: "summary_large_image" },
   };
 }
 

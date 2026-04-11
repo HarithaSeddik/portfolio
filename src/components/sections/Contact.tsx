@@ -13,7 +13,7 @@ export function Contact() {
     >
       <div className="mx-auto max-w-3xl text-center">
         <p className="mb-2 font-mono text-sm text-amber tracking-wide">
-          04 — Contact
+          05 — Contact
         </p>
         <h2 className="font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl">
           Let&apos;s talk

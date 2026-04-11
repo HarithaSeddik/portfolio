@@ -110,6 +110,18 @@ export function Projects() {
             </div>
           ))}
         </div>
+
+        <p className="mt-10 font-mono text-sm text-muted">
+          more projects coming —{" "}
+          <a
+            href="https://github.com/HarithaSeddik"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-amber transition-opacity hover:opacity-70"
+          >
+            github has the rest ↗
+          </a>
+        </p>
       </div>
     </section>
   );
