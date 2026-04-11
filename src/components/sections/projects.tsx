@@ -1,9 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useSectionReveal } from "@/lib/use-section-reveal";
-import { useStaggerReveal } from "@/lib/use-stagger-reveal";
 
 interface Project {
   title: string;
@@ -11,6 +10,15 @@ interface Project {
   tags: string[];
   slug?: string;
   status: "live" | "coming-soon";
+  // layout config for scattered effect
+  layout: {
+    x: string;       // left offset (%)
+    y: number;       // top offset (px) from container top
+    rotate: number;  // deg
+    zIndex: number;  // visual depth (1=back, 3=front)
+    scrollSpeed: number; // parallax factor (back=slow, front=fast)
+    width: string;   // card width
+  };
 }
 
 const projects: Project[] = [
@@ -21,6 +29,7 @@ const projects: Project[] = [
     tags: ["Claude", "Browser Automation", "Agents", "WhatsApp"],
     slug: "vinted-agent",
     status: "coming-soon",
+    layout: { x: "2%", y: 60, rotate: -4, zIndex: 2, scrollSpeed: 0.25, width: "340px" },
   },
   {
     title: "Halal Stock Screener",
@@ -29,6 +38,7 @@ const projects: Project[] = [
     tags: ["AI Agents", "Finance", "Python", "Technical Analysis"],
     slug: "halal-stock-screener",
     status: "coming-soon",
+    layout: { x: "30%", y: 20, rotate: 2.5, zIndex: 1, scrollSpeed: 0.12, width: "320px" },
   },
   {
     title: "AI Job Applier",
@@ -37,136 +47,82 @@ const projects: Project[] = [
     tags: ["Claude", "Browser Automation", "Email Parsing", "Agents"],
     slug: "ai-job-applier",
     status: "coming-soon",
+    layout: { x: "58%", y: 80, rotate: -2, zIndex: 3, scrollSpeed: 0.38, width: "330px" },
   },
 ];
 
-function useTilt(ref: React.RefObject<HTMLDivElement | null>) {
+function useScrollParallax(
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  cardRefs: React.RefObject<(HTMLDivElement | null)[]>
+) {
   useEffect(() => {
-    const card = ref.current;
-    if (!card) return;
-
-    const mq = window.matchMedia("(pointer: coarse)");
-    if (mq.matches) return; // skip touch devices
-
     const prefersReduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)"
     ).matches;
     if (prefersReduced) return;
 
-    const glare = card.querySelector<HTMLElement>(".card-glare");
-    const inner = card.querySelector<HTMLElement>(".card-inner");
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+    if (isTouchDevice) return;
+
     let rafId: number;
 
-    const onMove = (e: MouseEvent) => {
+    const onScroll = () => {
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
-        const rect = card.getBoundingClientRect();
-        const x = (e.clientX - rect.left) / rect.width - 0.5;
-        const y = (e.clientY - rect.top) / rect.height - 0.5;
+        const container = containerRef.current;
+        if (!container) return;
 
-        card.style.transform = `perspective(900px) rotateX(${-y * 9}deg) rotateY(${x * 9}deg)`;
+        const rect = container.getBoundingClientRect();
+        // progress: 0 when container bottom enters viewport, 1 when top exits
+        const viewportH = window.innerHeight;
+        const progress = 1 - (rect.bottom / (viewportH + rect.height));
 
-        if (glare) {
-          glare.style.background = `radial-gradient(circle at ${(x + 0.5) * 100}% ${(y + 0.5) * 100}%, rgba(255,255,255,0.13) 0%, transparent 65%)`;
-          glare.style.opacity = "1";
-        }
-        if (inner) {
-          inner.style.transform = `translateX(${x * -5}px) translateY(${y * -5}px)`;
-        }
+        cardRefs.current.forEach((card, i) => {
+          if (!card) return;
+          const speed = projects[i].layout.scrollSpeed;
+          const offset = progress * speed * 220;
+          card.style.transform =
+            `rotate(${projects[i].layout.rotate}deg) translateY(${-offset}px)`;
+        });
       });
     };
 
-    const onEnter = () => {
-      card.style.transition = "box-shadow 0.3s ease";
-      card.style.boxShadow = "0 24px 48px rgba(23,21,14,0.12), 0 8px 16px rgba(23,21,14,0.06)";
-    };
-
-    const onLeave = () => {
-      cancelAnimationFrame(rafId);
-      card.style.transition = "transform 0.55s cubic-bezier(0.23,1,0.32,1), box-shadow 0.55s ease";
-      card.style.transform = "perspective(900px) rotateX(0deg) rotateY(0deg)";
-      card.style.boxShadow = "";
-      if (glare) glare.style.opacity = "0";
-      if (inner) {
-        inner.style.transition = "transform 0.55s cubic-bezier(0.23,1,0.32,1)";
-        inner.style.transform = "translateX(0) translateY(0)";
-      }
-    };
-
-    card.addEventListener("mousemove", onMove);
-    card.addEventListener("mouseenter", onEnter);
-    card.addEventListener("mouseleave", onLeave);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       cancelAnimationFrame(rafId);
-      card.removeEventListener("mousemove", onMove);
-      card.removeEventListener("mouseenter", onEnter);
-      card.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("scroll", onScroll);
     };
-  }, [ref]);
-}
-
-function ProjectCard({ project }: { project: Project }) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  useTilt(cardRef);
-
-  const body = (
-    <div
-      ref={cardRef}
-      className="relative h-full rounded-2xl border border-border/60 bg-bg overflow-hidden"
-      style={{ willChange: "transform" }}
-    >
-      {/* glare overlay */}
-      <div
-        className="card-glare pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 z-10"
-        aria-hidden="true"
-      />
-      {/* inner content — shifts opposite to tilt */}
-      <div className="card-inner p-6 md:p-8 h-full flex flex-col">
-        {project.status === "coming-soon" && (
-          <span className="mb-3 inline-block self-start rounded-full bg-amber-pale px-3 py-1 font-mono text-xs text-amber">
-            Coming soon
-          </span>
-        )}
-        <h3 className="font-heading text-xl font-semibold text-ink">
-          {project.title}
-        </h3>
-        <p className="mt-3 text-sm leading-relaxed text-muted flex-1">
-          {project.description}
-        </p>
-        <div className="mt-5 flex flex-wrap gap-2">
-          {project.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full border border-border px-3 py-1 font-mono text-xs text-muted"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-        {project.slug && (
-          <p className="mt-4 font-mono text-xs text-amber">Read more →</p>
-        )}
-      </div>
-    </div>
-  );
-
-  if (project.slug) {
-    return (
-      <Link href={`/projects/${project.slug}`} className="block h-full">
-        {body}
-      </Link>
-    );
-  }
-  return body;
+  }, [containerRef, cardRefs]);
 }
 
 export function Projects() {
-  const ref = useSectionReveal();
-  const gridRef = useStaggerReveal(100);
+  const sectionRef = useSectionReveal();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [revealed, setRevealed] = useState(false);
+
+  useScrollParallax(containerRef, cardRefs);
+
+  // stagger cards in when section enters view
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setRevealed(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <section
-      ref={ref}
+      ref={sectionRef}
       id="projects"
       className="section-reveal px-6 py-24 md:py-32"
     >
@@ -182,15 +138,51 @@ export function Projects() {
           engineering and generative AI.
         </p>
 
+        {/* Scattered layout — desktop only */}
         <div
-          ref={gridRef}
-          className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          ref={containerRef}
+          className="relative mt-16 hidden md:block"
+          style={{ height: "520px" }}
         >
-          {projects.map((project) => (
-            <div key={project.title} data-stagger>
-              <ProjectCard project={project} />
+          {projects.map((project, i) => (
+            <div
+              key={project.title}
+              ref={(el) => { cardRefs.current[i] = el; }}
+              className="absolute"
+              style={{
+                left: project.layout.x,
+                top: project.layout.y,
+                width: project.layout.width,
+                zIndex: project.layout.zIndex,
+                transform: `rotate(${project.layout.rotate}deg)`,
+                opacity: revealed ? 1 : 0,
+                transition: `opacity 0.7s cubic-bezier(0.16,1,0.3,1) ${i * 180}ms, box-shadow 0.3s ease`,
+                boxShadow: "0 20px 60px rgba(23,21,14,0.10), 0 6px 20px rgba(23,21,14,0.07)",
+                borderRadius: "16px",
+              }}
+            >
+              {project.slug ? (
+                <Link href={`/projects/${project.slug}`} className="block">
+                  <ScatteredCard project={project} />
+                </Link>
+              ) : (
+                <ScatteredCard project={project} />
+              )}
             </div>
           ))}
+        </div>
+
+        {/* Mobile fallback — simple stack */}
+        <div className="mt-10 flex flex-col gap-6 md:hidden">
+          {projects.map((project) =>
+            project.slug ? (
+              <Link key={project.title} href={`/projects/${project.slug}`}>
+                <ScatteredCard project={project} />
+              </Link>
+            ) : (
+              <ScatteredCard key={project.title} project={project} />
+            )
+          )}
         </div>
 
         <p className="mt-10 font-mono text-sm text-muted">
@@ -206,5 +198,36 @@ export function Projects() {
         </p>
       </div>
     </section>
+  );
+}
+
+function ScatteredCard({ project }: { project: Project }) {
+  return (
+    <div className="rounded-2xl border border-border/50 bg-bg p-6 transition-all duration-300 hover:border-amber/30">
+      {project.status === "coming-soon" && (
+        <span className="mb-3 inline-block rounded-full bg-amber-pale px-3 py-1 font-mono text-xs text-amber">
+          Coming soon
+        </span>
+      )}
+      <h3 className="font-heading text-lg font-semibold text-ink">
+        {project.title}
+      </h3>
+      <p className="mt-2 text-sm leading-relaxed text-muted">
+        {project.description}
+      </p>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {project.tags.map((tag) => (
+          <span
+            key={tag}
+            className="rounded-full border border-border px-3 py-1 font-mono text-xs text-muted"
+          >
+            {tag}
+          </span>
+        ))}
+      </div>
+      {project.slug && (
+        <p className="mt-3 font-mono text-xs text-amber">Read more →</p>
+      )}
+    </div>
   );
 }
