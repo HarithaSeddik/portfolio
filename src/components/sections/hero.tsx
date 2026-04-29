@@ -10,6 +10,8 @@ const words = [
   "Curious Learner",
 ];
 
+const TAGLINE = "Software engineer exploring what happens when you give your code a brain.";
+
 const TYPING_SPEED = 80;
 const DELETING_SPEED = 50;
 const PAUSE_AFTER_TYPED = 2000;
@@ -32,7 +34,6 @@ function useTypewriter(items: string[]) {
 
   const tick = useCallback(() => {
     const currentWord = items[wordIndex];
-
     if (isDeleting) {
       setText(currentWord.substring(0, text.length - 1));
     } else {
@@ -45,11 +46,8 @@ function useTypewriter(items: string[]) {
       setText(items[0]);
       return;
     }
-
     const currentWord = items[wordIndex];
-
     let delay: number;
-
     if (!isDeleting && text === currentWord) {
       delay = PAUSE_AFTER_TYPED;
       const timeout = setTimeout(() => setIsDeleting(true), delay);
@@ -71,9 +69,39 @@ function useTypewriter(items: string[]) {
   return text;
 }
 
+function CharReveal({ text, baseDelay = 0 }: { text: string; baseDelay?: number }) {
+  const words = text.split(" ");
+  let charCount = 0;
+  return (
+    <>
+      {words.map((word, wi) => {
+        const wordStart = charCount;
+        charCount += word.length + 1; // +1 for the space
+        return (
+          <span key={wi} className="inline-block whitespace-nowrap">
+            {word.split("").map((char, ci) => (
+              <span key={ci} className="char-reveal-clip">
+                <span
+                  className="char-reveal-inner"
+                  style={{ animationDelay: `${baseDelay + (wordStart + ci) * 0.012}s` }}
+                >
+                  {char}
+                </span>
+              </span>
+            ))}
+            {wi < words.length - 1 && "\u00a0"}
+          </span>
+        );
+      })}
+    </>
+  );
+}
+
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const displayText = useTypewriter(words);
+  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -81,13 +109,33 @@ export function Hero() {
     requestAnimationFrame(() => el.classList.add("in-view"));
   }, []);
 
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mq.matches) return;
+
+    const onScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const parallaxY = scrollY * 0.22;
+  const fadeOpacity = Math.max(0, 1 - scrollY / 520);
+
   return (
     <section
       ref={sectionRef}
       id="hero"
       className="section-reveal flex min-h-[calc(100vh-64px)] flex-col justify-center px-6"
     >
-      <div className="mx-auto w-full max-w-5xl">
+      <div
+        ref={contentRef}
+        className="mx-auto w-full max-w-5xl"
+        style={{
+          transform: `translateY(${parallaxY}px)`,
+          opacity: fadeOpacity,
+          willChange: "transform, opacity",
+        }}
+      >
         <p className="mb-4 text-sm font-mono text-amber tracking-wide">
           Hello, I&apos;m
         </p>
@@ -96,8 +144,7 @@ export function Hero() {
           <span className="typewriter-cursor ml-0.5 text-amber">|</span>
         </h1>
         <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted md:text-xl">
-          Software engineer exploring what happens when you give your code a
-          brain.
+          <CharReveal text={TAGLINE} baseDelay={0.3} />
         </p>
         <div className="mt-10 flex gap-4">
           <a

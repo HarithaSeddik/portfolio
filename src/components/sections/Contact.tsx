@@ -12,12 +12,16 @@ export function Contact() {
       className="section-reveal px-6 py-24 md:py-32"
     >
       <div className="mx-auto max-w-3xl text-center">
-        <p className="mb-2 font-mono text-sm text-amber tracking-wide">
-          04 — Contact
-        </p>
-        <h2 className="font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl">
-          Let&apos;s talk
-        </h2>
+        <div data-parallax="label">
+          <p className="mb-2 font-mono text-sm text-amber tracking-wide">
+            05 — Contact
+          </p>
+        </div>
+        <div data-parallax="heading">
+          <h2 className="font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl">
+            Let&apos;s talk
+          </h2>
+        </div>
         <p className="mt-4 text-muted md:text-lg">
           Whether it&apos;s a project, an idea, or just a conversation about
           what AI can do — I&apos;d love to hear from you.

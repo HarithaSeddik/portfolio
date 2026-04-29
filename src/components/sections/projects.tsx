@@ -1,13 +1,25 @@
 "use client";
 
+import Link from "next/link";
+import { ViewTransition } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useSectionReveal } from "@/lib/use-section-reveal";
 
 interface Project {
   title: string;
   description: string;
   tags: string[];
-  href?: string;
+  slug?: string;
   status: "live" | "coming-soon";
+  // layout config for scattered effect
+  layout: {
+    x: string;       // left offset (%)
+    y: number;       // top offset (px) from container top
+    rotate: number;  // deg
+    zIndex: number;  // visual depth (1=back, 3=front)
+    scrollSpeed: number; // parallax factor (back=slow, front=fast)
+    width: string;   // card width
+  };
 }
 
 const projects: Project[] = [
@@ -16,39 +28,224 @@ const projects: Project[] = [
     description:
       "An AI personal shopper that hunts rare finds on Vinted and automates listings — no API needed. Learns your taste, runs scheduled sweeps, and sends WhatsApp summaries of the best finds.",
     tags: ["Claude", "Browser Automation", "Agents", "WhatsApp"],
+    slug: "vinted-agent",
     status: "coming-soon",
+    layout: { x: "1%", y: 80, rotate: -3, zIndex: 2, scrollSpeed: 0.25, width: "300px" },
   },
   {
     title: "Halal Stock Screener",
     description:
       "An AI analyst that filters, researches, and charts stocks end to end — Sharia compliance screening, fundamental analysis, earnings review, and technical charting with entry/exit levels.",
     tags: ["AI Agents", "Finance", "Python", "Technical Analysis"],
+    slug: "halal-stock-screener",
     status: "coming-soon",
+    layout: { x: "36%", y: 20, rotate: 2, zIndex: 1, scrollSpeed: 0.12, width: "295px" },
   },
   {
     title: "AI Job Applier",
     description:
       "Recruiters automated screening — so we automated applying. Monitors job alerts, evaluates listings against your profile, tailors resumes per application, and submits automatically.",
     tags: ["Claude", "Browser Automation", "Email Parsing", "Agents"],
+    slug: "ai-job-applier",
     status: "coming-soon",
+    layout: { x: "68%", y: 110, rotate: -1.5, zIndex: 3, scrollSpeed: 0.38, width: "300px" },
   },
 ];
 
-function ProjectCard({ project }: { project: Project }) {
+function useScrollParallax(
+  containerRef: React.RefObject<HTMLDivElement | null>,
+  cardRefs: React.RefObject<(HTMLDivElement | null)[]>
+) {
+  useEffect(() => {
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    if (prefersReduced) return;
+
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
+    if (isTouchDevice) return;
+
+    let rafId: number;
+
+    const onScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const rect = container.getBoundingClientRect();
+        // progress: 0 when container bottom enters viewport, 1 when top exits
+        const viewportH = window.innerHeight;
+        const progress = 1 - (rect.bottom / (viewportH + rect.height));
+
+        cardRefs.current.forEach((card, i) => {
+          if (!card) return;
+          const speed = projects[i].layout.scrollSpeed;
+          const offset = progress * speed * 220;
+          card.style.transform =
+            `rotate(${projects[i].layout.rotate}deg) translateY(${-offset}px)`;
+        });
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [containerRef, cardRefs]);
+}
+
+export function Projects() {
+  const sectionRef = useSectionReveal();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [revealed, setRevealed] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+
+  useScrollParallax(containerRef, cardRefs);
+
+  // stagger cards in when section enters view
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setRevealed(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 }
+    );
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className="group relative rounded-2xl border border-border/60 bg-bg p-6 transition-all duration-300 hover:border-amber/40 hover:shadow-[0_4px_24px_rgba(196,138,8,0.06)] md:p-8">
+    <section
+      ref={sectionRef}
+      id="projects"
+      className="section-reveal px-6 py-24 md:py-32"
+    >
+      <div className="mx-auto max-w-5xl">
+        <div data-parallax="label">
+          <p className="mb-2 font-mono text-sm text-amber tracking-wide">
+            02 — Projects
+          </p>
+        </div>
+        <div data-parallax="heading">
+          <h2 className="font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl">
+            Things I&apos;m building
+          </h2>
+        </div>
+        <p className="mt-4 max-w-xl text-muted">
+          AI-first projects that explore the intersection of software
+          engineering and generative AI.
+        </p>
+
+        {/* Scattered layout — desktop only */}
+        <div
+          ref={containerRef}
+          className="relative mt-16 hidden md:block"
+          style={{ height: "580px" }}
+        >
+          {projects.map((project, i) => {
+            const isHovered = hoveredIndex === i;
+            return (
+              <div
+                key={project.title}
+                ref={(el) => { cardRefs.current[i] = el; }}
+                className="absolute"
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                style={{
+                  left: project.layout.x,
+                  top: project.layout.y,
+                  width: project.layout.width,
+                  zIndex: isHovered ? 20 : project.layout.zIndex,
+                  transform: `rotate(${project.layout.rotate}deg)`,
+                  opacity: revealed ? 1 : 0,
+                  transition: `opacity 0.7s cubic-bezier(0.16,1,0.3,1) ${i * 180}ms, z-index 0s`,
+                  borderRadius: "16px",
+                }}
+              >
+                {/* Inner lift wrapper — independent of parallax rotation on outer */}
+                <div
+                  style={{
+                    transform: isHovered ? "scale(1.04) translateY(-10px)" : "scale(1) translateY(0)",
+                    boxShadow: isHovered
+                      ? "0 32px 80px rgba(23,21,14,0.18), 0 12px 32px rgba(196,138,8,0.08)"
+                      : "0 20px 60px rgba(23,21,14,0.10), 0 6px 20px rgba(23,21,14,0.07)",
+                    transition: "transform 0.5s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.5s cubic-bezier(0.34,1.56,0.64,1)",
+                    borderRadius: "16px",
+                  }}
+                >
+                  {project.slug ? (
+                    <Link href={`/projects/${project.slug}`} transitionTypes={["nav-forward"]} className="block">
+                      <ScatteredCard project={project} />
+                    </Link>
+                  ) : (
+                    <ScatteredCard project={project} />
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Mobile fallback — simple stack */}
+        <div className="mt-10 flex flex-col gap-6 md:hidden">
+          {projects.map((project) =>
+            project.slug ? (
+              <Link key={project.title} href={`/projects/${project.slug}`} transitionTypes={["nav-forward"]}>
+                <ScatteredCard project={project} />
+              </Link>
+            ) : (
+              <ScatteredCard key={project.title} project={project} />
+            )
+          )}
+        </div>
+
+        <p className="mt-10 font-mono text-sm text-muted">
+          more projects coming —{" "}
+          <a
+            href="https://github.com/HarithaSeddik"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-amber transition-opacity hover:opacity-70"
+          >
+            github has the rest ↗
+          </a>
+        </p>
+      </div>
+    </section>
+  );
+}
+
+function ScatteredCard({ project }: { project: Project }) {
+  return (
+    <div className="rounded-2xl border border-border/50 bg-bg p-6 transition-all duration-300 hover:border-amber/30">
       {project.status === "coming-soon" && (
         <span className="mb-3 inline-block rounded-full bg-amber-pale px-3 py-1 font-mono text-xs text-amber">
           Coming soon
         </span>
       )}
-      <h3 className="font-heading text-xl font-semibold text-ink">
-        {project.title}
-      </h3>
-      <p className="mt-3 text-sm leading-relaxed text-muted">
+      {project.slug ? (
+        <ViewTransition name={`project-title-${project.slug}`} share="text-morph" default="none">
+          <h3 className="font-heading text-lg font-semibold text-ink">
+            {project.title}
+          </h3>
+        </ViewTransition>
+      ) : (
+        <h3 className="font-heading text-lg font-semibold text-ink">
+          {project.title}
+        </h3>
+      )}
+      <p className="mt-2 text-sm leading-relaxed text-muted">
         {project.description}
       </p>
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div className="mt-4 flex flex-wrap gap-2">
         {project.tags.map((tag) => (
           <span
             key={tag}
@@ -58,37 +255,9 @@ function ProjectCard({ project }: { project: Project }) {
           </span>
         ))}
       </div>
+      {project.slug && (
+        <p className="mt-3 font-mono text-xs text-amber">Read more →</p>
+      )}
     </div>
-  );
-}
-
-export function Projects() {
-  const ref = useSectionReveal();
-
-  return (
-    <section
-      ref={ref}
-      id="projects"
-      className="section-reveal px-6 py-24 md:py-32"
-    >
-      <div className="mx-auto max-w-5xl">
-        <p className="mb-2 font-mono text-sm text-amber tracking-wide">
-          02 — Projects
-        </p>
-        <h2 className="font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl">
-          Things I&apos;m building
-        </h2>
-        <p className="mt-4 max-w-xl text-muted">
-          AI-first projects that explore the intersection of software
-          engineering and generative AI.
-        </p>
-
-        <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {projects.map((project) => (
-            <ProjectCard key={project.title} project={project} />
-          ))}
-        </div>
-      </div>
-    </section>
   );
 }

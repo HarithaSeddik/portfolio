@@ -37,6 +37,9 @@ export function Footer() {
         <p className="text-faint">
           &copy; {new Date().getFullYear()} Haritha Akkad
         </p>
+        <p className="font-mono text-xs text-faint">
+          built with claude code
+        </p>
       </div>
     </footer>
   );

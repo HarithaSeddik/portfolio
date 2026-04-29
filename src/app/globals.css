@@ -3,7 +3,7 @@
 :root {
   --bg: #f9f7f2;
   --ink: #17150e;
-  --muted: #7a7262;
+  --muted: #5c5549;
   --faint: #c0b9a8;
   --amber: #c48a08;
   --amber-pale: #fdf4df;
@@ -63,6 +63,20 @@ body {
   transform: translateY(0);
 }
 
+/* Staggered child reveals within sections */
+.reveal-item {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0ms);
+}
+
+.section-reveal.in-view .reveal-item {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 /* Custom cursor states */
 .visible {
   opacity: 1 !important;
@@ -73,6 +87,153 @@ body {
   height: 40px !important;
   background: rgba(196, 138, 8, 0.1) !important;
   border-color: rgba(196, 138, 8, 0.3) !important;
+}
+
+/* Focus visible */
+:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 3px;
+}
+
+/* MDX case study prose */
+.prose-portfolio {
+  color: var(--muted);
+  font-size: 1.0625rem;
+  line-height: 1.8;
+}
+
+.prose-portfolio h2 {
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.015em;
+}
+
+.prose-portfolio h3 {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-portfolio p {
+  margin-top: 0;
+  margin-bottom: 1.25rem;
+}
+
+.prose-portfolio ul, .prose-portfolio ol {
+  margin-bottom: 1.25rem;
+  padding-left: 1.25rem;
+}
+
+.prose-portfolio li {
+  margin-bottom: 0.4rem;
+}
+
+.prose-portfolio a {
+  color: var(--amber);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prose-portfolio code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--amber-pale);
+  color: var(--ink);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+
+.prose-portfolio pre {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 1.25rem;
+  border-radius: 10px;
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.prose-portfolio pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+}
+
+.prose-portfolio blockquote {
+  border-left: 3px solid var(--amber);
+  margin-left: 0;
+  padding-left: 1.25rem;
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: 1.25rem;
+}
+
+.prose-portfolio hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 2.5rem 0;
+}
+
+/* Word / character reveal animation (pretext-style) */
+@keyframes wordUp {
+  from {
+    transform: translateY(105%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Word-level reveal */
+.word-reveal-clip {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.word-reveal-inner {
+  display: inline-block;
+  animation: wordUp 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Character-level reveal (pretext) */
+.char-reveal-clip {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.char-reveal-inner {
+  display: inline-block;
+  animation: wordUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Caption word reveal (beyond-code) — triggered by parent .in-view */
+.caption-word-clip {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+}
+
+.caption-word-inner {
+  display: inline-block;
+  transform: translateY(100%);
+  opacity: 0;
+}
+
+.section-reveal.in-view .caption-word-inner {
+  animation: wordUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) var(--caption-delay, 0s) both;
 }
 
 /* Typewriter cursor blink */
@@ -93,6 +254,30 @@ body {
     transition: none;
   }
 
+  .reveal-item {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .word-reveal-inner {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  .char-reveal-inner {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+
+  .caption-word-inner {
+    animation: none;
+    transform: none;
+    opacity: 1;
+  }
+
   html {
     scroll-behavior: auto;
   }
@@ -100,4 +285,110 @@ body {
   .typewriter-cursor {
     animation: none;
   }
+
+  ::view-transition-old(*),
+  ::view-transition-new(*),
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+  }
+}
+
+/* ─── View Transition CSS Recipes ─────────────────────────────────────────── */
+
+:root {
+  --duration-exit: 150ms;
+  --duration-enter: 210ms;
+  --duration-move: 400ms;
+}
+
+@keyframes vt-fade {
+  from { filter: blur(3px); opacity: 0; }
+  to   { filter: blur(0);   opacity: 1; }
+}
+
+@keyframes vt-slide {
+  from { translate: var(--slide-offset); }
+  to   { translate: 0; }
+}
+
+/* Fade */
+::view-transition-old(.fade-out) {
+  animation: var(--duration-exit) ease-in vt-fade reverse;
+}
+::view-transition-new(.fade-in) {
+  animation: var(--duration-enter) ease-out var(--duration-exit) both vt-fade;
+}
+
+/* Directional navigation (home ↔ case study) */
+::view-transition-old(.nav-forward) {
+  --slide-offset: -60px;
+  animation:
+    var(--duration-exit) ease-in both vt-fade reverse,
+    var(--duration-move) ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-forward) {
+  --slide-offset: 60px;
+  animation:
+    var(--duration-enter) ease-out var(--duration-exit) both vt-fade,
+    var(--duration-move) ease-in-out both vt-slide;
+}
+::view-transition-old(.nav-back) {
+  --slide-offset: 60px;
+  animation:
+    var(--duration-exit) ease-in both vt-fade reverse,
+    var(--duration-move) ease-in-out both vt-slide reverse;
+}
+::view-transition-new(.nav-back) {
+  --slide-offset: -60px;
+  animation:
+    var(--duration-enter) ease-out var(--duration-exit) both vt-fade,
+    var(--duration-move) ease-in-out both vt-slide;
+}
+
+/* Text shared element morph (card title → case study h1) — hides raster scale artifact */
+::view-transition-group(.text-morph) {
+  animation-duration: var(--duration-move);
+}
+::view-transition-old(.text-morph) {
+  display: none;
+}
+::view-transition-new(.text-morph) {
+  animation: none;
+  object-fit: none;
+  object-position: left top;
+}
+
+/* Persistent element isolation — header with backdrop-blur */
+::view-transition-old(site-header) {
+  display: none;
+}
+::view-transition-new(site-header) {
+  animation: none;
+}
+
+/* ─── Typography fixes ─────────────────────────────────────────────────────── */
+
+h1, h2, h3 {
+  text-wrap: balance;
+}
+
+/* ─── Nav link underline micro-interaction ─────────────────────────────────── */
+
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.nav-link:hover::after,
+.nav-link:focus-visible::after {
+  width: 100%;
 }
