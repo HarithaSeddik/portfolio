@@ -36,6 +36,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      style={{ colorScheme: "light" }}
       className={`${inter.variable} ${syne.variable} ${jetbrainsMono.variable} antialiased`}
     >
       <body className="min-h-screen flex flex-col bg-bg text-ink">

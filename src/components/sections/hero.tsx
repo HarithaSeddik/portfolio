@@ -69,21 +69,30 @@ function useTypewriter(items: string[]) {
   return text;
 }
 
-function WordReveal({ text, baseDelay = 0 }: { text: string; baseDelay?: number }) {
-  const tagWords = text.split(" ");
+function CharReveal({ text, baseDelay = 0 }: { text: string; baseDelay?: number }) {
+  const words = text.split(" ");
+  let charCount = 0;
   return (
     <>
-      {tagWords.map((word, i) => (
-        <span key={i} className="word-reveal-clip">
-          <span
-            className="word-reveal-inner"
-            style={{ animationDelay: `${baseDelay + i * 0.06}s` }}
-          >
-            {word}
-            {i < tagWords.length - 1 ? "\u00a0" : ""}
+      {words.map((word, wi) => {
+        const wordStart = charCount;
+        charCount += word.length + 1; // +1 for the space
+        return (
+          <span key={wi} className="inline-block whitespace-nowrap">
+            {word.split("").map((char, ci) => (
+              <span key={ci} className="char-reveal-clip">
+                <span
+                  className="char-reveal-inner"
+                  style={{ animationDelay: `${baseDelay + (wordStart + ci) * 0.012}s` }}
+                >
+                  {char}
+                </span>
+              </span>
+            ))}
+            {wi < words.length - 1 && "\u00a0"}
           </span>
-        </span>
-      ))}
+        );
+      })}
     </>
   );
 }
@@ -135,7 +144,7 @@ export function Hero() {
           <span className="typewriter-cursor ml-0.5 text-amber">|</span>
         </h1>
         <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted md:text-xl">
-          <WordReveal text={TAGLINE} baseDelay={0.3} />
+          <CharReveal text={TAGLINE} baseDelay={0.3} />
         </p>
         <div className="mt-10 flex gap-4">
           <a

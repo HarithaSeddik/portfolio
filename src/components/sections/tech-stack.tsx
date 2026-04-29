@@ -42,12 +42,16 @@ export function TechStack() {
       className="section-reveal px-6 py-24 md:py-32"
     >
       <div className="mx-auto max-w-5xl">
-        <p className="mb-2 font-mono text-sm text-amber tracking-wide">
-          03 — Stack
-        </p>
-        <h2 className="font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl">
-          Tools I work with
-        </h2>
+        <div data-parallax="label">
+          <p className="mb-2 font-mono text-sm text-amber tracking-wide">
+            03 — Stack
+          </p>
+        </div>
+        <div data-parallax="heading">
+          <h2 className="font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl">
+            Tools I work with
+          </h2>
+        </div>
         <p className="mt-4 max-w-xl text-muted">
           From mobile SDKs to AI agents — the stack evolves, but the
           fundamentals stay solid.

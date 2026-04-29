@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ViewTransition } from "react";
 import { useRef, useEffect, useState } from "react";
 import { useSectionReveal } from "@/lib/use-section-reveal";
 
@@ -29,7 +30,7 @@ const projects: Project[] = [
     tags: ["Claude", "Browser Automation", "Agents", "WhatsApp"],
     slug: "vinted-agent",
     status: "coming-soon",
-    layout: { x: "2%", y: 60, rotate: -4, zIndex: 2, scrollSpeed: 0.25, width: "340px" },
+    layout: { x: "1%", y: 80, rotate: -3, zIndex: 2, scrollSpeed: 0.25, width: "300px" },
   },
   {
     title: "Halal Stock Screener",
@@ -38,7 +39,7 @@ const projects: Project[] = [
     tags: ["AI Agents", "Finance", "Python", "Technical Analysis"],
     slug: "halal-stock-screener",
     status: "coming-soon",
-    layout: { x: "30%", y: 20, rotate: 2.5, zIndex: 1, scrollSpeed: 0.12, width: "320px" },
+    layout: { x: "36%", y: 20, rotate: 2, zIndex: 1, scrollSpeed: 0.12, width: "295px" },
   },
   {
     title: "AI Job Applier",
@@ -47,7 +48,7 @@ const projects: Project[] = [
     tags: ["Claude", "Browser Automation", "Email Parsing", "Agents"],
     slug: "ai-job-applier",
     status: "coming-soon",
-    layout: { x: "58%", y: 80, rotate: -2, zIndex: 3, scrollSpeed: 0.38, width: "330px" },
+    layout: { x: "68%", y: 110, rotate: -1.5, zIndex: 3, scrollSpeed: 0.38, width: "300px" },
   },
 ];
 
@@ -100,6 +101,7 @@ export function Projects() {
   const containerRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [revealed, setRevealed] = useState(false);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   useScrollParallax(containerRef, cardRefs);
 
@@ -127,12 +129,16 @@ export function Projects() {
       className="section-reveal px-6 py-24 md:py-32"
     >
       <div className="mx-auto max-w-5xl">
-        <p className="mb-2 font-mono text-sm text-amber tracking-wide">
-          02 — Projects
-        </p>
-        <h2 className="font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl">
-          Things I&apos;m building
-        </h2>
+        <div data-parallax="label">
+          <p className="mb-2 font-mono text-sm text-amber tracking-wide">
+            02 — Projects
+          </p>
+        </div>
+        <div data-parallax="heading">
+          <h2 className="font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl">
+            Things I&apos;m building
+          </h2>
+        </div>
         <p className="mt-4 max-w-xl text-muted">
           AI-first projects that explore the intersection of software
           engineering and generative AI.
@@ -142,41 +148,57 @@ export function Projects() {
         <div
           ref={containerRef}
           className="relative mt-16 hidden md:block"
-          style={{ height: "520px" }}
+          style={{ height: "580px" }}
         >
-          {projects.map((project, i) => (
-            <div
-              key={project.title}
-              ref={(el) => { cardRefs.current[i] = el; }}
-              className="absolute"
-              style={{
-                left: project.layout.x,
-                top: project.layout.y,
-                width: project.layout.width,
-                zIndex: project.layout.zIndex,
-                transform: `rotate(${project.layout.rotate}deg)`,
-                opacity: revealed ? 1 : 0,
-                transition: `opacity 0.7s cubic-bezier(0.16,1,0.3,1) ${i * 180}ms, box-shadow 0.3s ease`,
-                boxShadow: "0 20px 60px rgba(23,21,14,0.10), 0 6px 20px rgba(23,21,14,0.07)",
-                borderRadius: "16px",
-              }}
-            >
-              {project.slug ? (
-                <Link href={`/projects/${project.slug}`} className="block">
-                  <ScatteredCard project={project} />
-                </Link>
-              ) : (
-                <ScatteredCard project={project} />
-              )}
-            </div>
-          ))}
+          {projects.map((project, i) => {
+            const isHovered = hoveredIndex === i;
+            return (
+              <div
+                key={project.title}
+                ref={(el) => { cardRefs.current[i] = el; }}
+                className="absolute"
+                onMouseEnter={() => setHoveredIndex(i)}
+                onMouseLeave={() => setHoveredIndex(null)}
+                style={{
+                  left: project.layout.x,
+                  top: project.layout.y,
+                  width: project.layout.width,
+                  zIndex: isHovered ? 20 : project.layout.zIndex,
+                  transform: `rotate(${project.layout.rotate}deg)`,
+                  opacity: revealed ? 1 : 0,
+                  transition: `opacity 0.7s cubic-bezier(0.16,1,0.3,1) ${i * 180}ms, z-index 0s`,
+                  borderRadius: "16px",
+                }}
+              >
+                {/* Inner lift wrapper — independent of parallax rotation on outer */}
+                <div
+                  style={{
+                    transform: isHovered ? "scale(1.04) translateY(-10px)" : "scale(1) translateY(0)",
+                    boxShadow: isHovered
+                      ? "0 32px 80px rgba(23,21,14,0.18), 0 12px 32px rgba(196,138,8,0.08)"
+                      : "0 20px 60px rgba(23,21,14,0.10), 0 6px 20px rgba(23,21,14,0.07)",
+                    transition: "transform 0.5s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.5s cubic-bezier(0.34,1.56,0.64,1)",
+                    borderRadius: "16px",
+                  }}
+                >
+                  {project.slug ? (
+                    <Link href={`/projects/${project.slug}`} transitionTypes={["nav-forward"]} className="block">
+                      <ScatteredCard project={project} />
+                    </Link>
+                  ) : (
+                    <ScatteredCard project={project} />
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         {/* Mobile fallback — simple stack */}
         <div className="mt-10 flex flex-col gap-6 md:hidden">
           {projects.map((project) =>
             project.slug ? (
-              <Link key={project.title} href={`/projects/${project.slug}`}>
+              <Link key={project.title} href={`/projects/${project.slug}`} transitionTypes={["nav-forward"]}>
                 <ScatteredCard project={project} />
               </Link>
             ) : (
@@ -209,9 +231,17 @@ function ScatteredCard({ project }: { project: Project }) {
           Coming soon
         </span>
       )}
-      <h3 className="font-heading text-lg font-semibold text-ink">
-        {project.title}
-      </h3>
+      {project.slug ? (
+        <ViewTransition name={`project-title-${project.slug}`} share="text-morph" default="none">
+          <h3 className="font-heading text-lg font-semibold text-ink">
+            {project.title}
+          </h3>
+        </ViewTransition>
+      ) : (
+        <h3 className="font-heading text-lg font-semibold text-ink">
+          {project.title}
+        </h3>
+      )}
       <p className="mt-2 text-sm leading-relaxed text-muted">
         {project.description}
       </p>

@@ -13,18 +13,22 @@ export function About() {
       className="section-reveal px-6 py-24 md:py-32"
     >
       <div className="mx-auto max-w-4xl">
-        <p
-          className="reveal-item mb-2 font-mono text-sm text-amber tracking-wide"
-          style={{ "--reveal-delay": "0ms" } as React.CSSProperties}
-        >
-          01 — About
-        </p>
-        <h2
-          className="reveal-item font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl"
-          style={{ "--reveal-delay": "80ms" } as React.CSSProperties}
-        >
-          The short version
-        </h2>
+        <div data-parallax="label">
+          <p
+            className="reveal-item mb-2 font-mono text-sm text-amber tracking-wide"
+            style={{ "--reveal-delay": "0ms" } as React.CSSProperties}
+          >
+            01 — About
+          </p>
+        </div>
+        <div data-parallax="heading">
+          <h2
+            className="reveal-item font-heading text-3xl font-semibold tracking-tight text-ink md:text-4xl"
+            style={{ "--reveal-delay": "80ms" } as React.CSSProperties}
+          >
+            The short version
+          </h2>
+        </div>
 
         <div
           className="reveal-item mt-10 flex flex-col items-start gap-10 md:flex-row"
