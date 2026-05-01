@@ -1,6 +1,11 @@
 "use client";
 
 import { useEffect, useRef, useState, useCallback } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const words = [
   "Haritha Seddik",
@@ -17,6 +22,15 @@ const DELETING_SPEED = 50;
 const PAUSE_AFTER_TYPED = 2000;
 const PAUSE_AFTER_DELETED = 500;
 
+// Sections for the scroll-scrubbed timeline (hero is excluded)
+const NAV_SECTIONS = [
+  { id: "about",    label: "About" },
+  { id: "projects", label: "Projects" },
+  { id: "stack",    label: "Stack" },
+  { id: "beyond",   label: "Beyond" },
+  { id: "contact",  label: "Contact" },
+];
+
 function useTypewriter(items: string[]) {
   const [text, setText] = useState("");
   const [wordIndex, setWordIndex] = useState(0);
@@ -26,8 +40,7 @@ function useTypewriter(items: string[]) {
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     setPrefersReducedMotion(mq.matches);
-    const handler = (e: MediaQueryListEvent) =>
-      setPrefersReducedMotion(e.matches);
+    const handler = (e: MediaQueryListEvent) => setPrefersReducedMotion(e.matches);
     mq.addEventListener("change", handler);
     return () => mq.removeEventListener("change", handler);
   }, []);
@@ -42,10 +55,7 @@ function useTypewriter(items: string[]) {
   }, [items, wordIndex, text, isDeleting]);
 
   useEffect(() => {
-    if (prefersReducedMotion) {
-      setText(items[0]);
-      return;
-    }
+    if (prefersReducedMotion) { setText(items[0]); return; }
     const currentWord = items[wordIndex];
     let delay: number;
     if (!isDeleting && text === currentWord) {
@@ -76,7 +86,7 @@ function CharReveal({ text, baseDelay = 0 }: { text: string; baseDelay?: number 
     <>
       {words.map((word, wi) => {
         const wordStart = charCount;
-        charCount += word.length + 1; // +1 for the space
+        charCount += word.length + 1;
         return (
           <span key={wi} className="inline-block whitespace-nowrap">
             {word.split("").map((char, ci) => (
@@ -89,7 +99,7 @@ function CharReveal({ text, baseDelay = 0 }: { text: string; baseDelay?: number 
                 </span>
               </span>
             ))}
-            {wi < words.length - 1 && "\u00a0"}
+            {wi < words.length - 1 && " "}
           </span>
         );
       })}
@@ -97,11 +107,147 @@ function CharReveal({ text, baseDelay = 0 }: { text: string; baseDelay?: number 
   );
 }
 
+function ScrollTimeline() {
+  const lineRef = useRef<HTMLDivElement>(null);
+  const dotRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const labelRefs = useRef<(HTMLSpanElement | null)[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useGSAP(() => {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return;
+
+    // Animate the fill line from 0 to 100% as the whole page scrolls
+    gsap.fromTo(
+      lineRef.current,
+      { height: "0%" },
+      {
+        height: "100%",
+        ease: "none",
+        scrollTrigger: {
+          trigger: document.body,
+          start: "top top",
+          end: "bottom bottom",
+          scrub: 1,
+        },
+      }
+    );
+
+    // Each section: highlight dot + label when in viewport
+    NAV_SECTIONS.forEach((section, i) => {
+      const el = document.getElementById(section.id);
+      if (!el) return;
+
+      ScrollTrigger.create({
+        trigger: el,
+        start: "top 55%",
+        end: "bottom 45%",
+        onEnter: () => activate(i),
+        onEnterBack: () => activate(i),
+        onLeave: () => deactivate(i),
+        onLeaveBack: () => deactivate(i),
+      });
+    });
+
+    function activate(i: number) {
+      const dot = dotRefs.current[i];
+      const label = labelRefs.current[i];
+      if (dot) {
+        gsap.to(dot, { scale: 1.6, backgroundColor: "var(--amber)", duration: 0.3 });
+      }
+      if (label) label.style.opacity = "1";
+    }
+    function deactivate(i: number) {
+      const dot = dotRefs.current[i];
+      const label = labelRefs.current[i];
+      if (dot) {
+        gsap.to(dot, { scale: 1, backgroundColor: "rgba(196,138,8,0.3)", duration: 0.3 });
+      }
+      if (label) label.style.opacity = "0";
+    }
+  });
+
+  return (
+    <div
+      ref={containerRef}
+      className="fixed top-1/2 right-6 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-0"
+      aria-hidden="true"
+    >
+      <style>{`
+        .timeline-dot { transition: transform 0.3s, background-color 0.3s; }
+        .timeline-label {
+          position: absolute;
+          right: 20px;
+          font-family: var(--font-mono);
+          font-size: 10px;
+          color: var(--amber);
+          opacity: 0;
+          transition: opacity 0.3s;
+          white-space: nowrap;
+          pointer-events: none;
+          top: 50%;
+          transform: translateY(-50%);
+        }
+      `}</style>
+
+      {/* Track */}
+      <div className="relative" style={{ width: 2, height: `${(NAV_SECTIONS.length - 1) * 48 + 8}px` }}>
+        {/* Background track */}
+        <div
+          className="absolute inset-x-0 top-0 bottom-0 rounded-full"
+          style={{ background: "rgba(196,138,8,0.15)" }}
+        />
+        {/* Fill line */}
+        <div
+          ref={lineRef}
+          className="absolute inset-x-0 top-0 rounded-full"
+          style={{ height: "0%", background: "var(--amber)", opacity: 0.6 }}
+        />
+
+        {/* Dots */}
+        {NAV_SECTIONS.map((section, i) => (
+          <div
+            key={section.id}
+            className="absolute"
+            style={{
+              top: i * 48,
+              left: "50%",
+              transform: "translateX(-50%)",
+            }}
+          >
+            <div
+              ref={(el) => { dotRefs.current[i] = el; }}
+              className="timeline-dot rounded-full"
+              style={{
+                width: 8,
+                height: 8,
+                backgroundColor: "rgba(196,138,8,0.3)",
+                cursor: "pointer",
+              }}
+              onClick={() => {
+                document.getElementById(section.id)?.scrollIntoView({ behavior: "smooth" });
+              }}
+            />
+            <span
+              ref={(el) => { labelRefs.current[i] = el; }}
+              className="timeline-label"
+            >
+              {section.label}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function Hero() {
   const sectionRef = useRef<HTMLElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  const taglineRef = useRef<HTMLParagraphElement>(null);
+  const ctasRef = useRef<HTMLDivElement>(null);
+  const blobRef = useRef<HTMLDivElement>(null);
   const displayText = useTypewriter(words);
-  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -109,58 +255,115 @@ export function Hero() {
     requestAnimationFrame(() => el.classList.add("in-view"));
   }, []);
 
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mq.matches) return;
+  // Apple-style GSAP pin: hero content scales + fades out as you scroll into next section
+  useGSAP(() => {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isMobile = window.matchMedia("(max-width: 767px)").matches;
+    if (prefersReduced || isMobile) return;
 
-    const onScroll = () => setScrollY(window.scrollY);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: sectionRef.current,
+        start: "top top",
+        end: "+=140%",
+        pin: true,
+        pinSpacing: true,
+        scrub: 0.8,
+      },
+    });
+
+    tl.to(headingRef.current, { scale: 0.85, opacity: 0, y: -40, ease: "power1.in" }, 0);
+    tl.to(taglineRef.current, { y: -60, opacity: 0, ease: "power1.in" }, 0.08);
+    tl.to(ctasRef.current, { y: -60, opacity: 0, ease: "power1.in" }, 0.14);
+  }, { scope: sectionRef as unknown as React.RefObject<HTMLElement> });
+
+  // Blob at 0.5x scroll speed via GSAP scrub
+  useEffect(() => {
+    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (prefersReduced) return;
+
+    const blob = blobRef.current;
+    if (!blob) return;
+
+    const st = ScrollTrigger.create({
+      trigger: document.body,
+      start: "top top",
+      end: "bottom bottom",
+      scrub: true,
+      onUpdate: (self) => {
+        const offset = self.progress * window.innerHeight * 0.5;
+        blob.style.transform = `translateY(${-offset}px)`;
+      },
+    });
+
+    return () => st.kill();
   }, []);
 
-  const parallaxY = scrollY * 0.22;
-  const fadeOpacity = Math.max(0, 1 - scrollY / 520);
-
   return (
-    <section
-      ref={sectionRef}
-      id="hero"
-      className="section-reveal flex min-h-[calc(100vh-64px)] flex-col justify-center px-6"
-    >
-      <div
-        ref={contentRef}
-        className="mx-auto w-full max-w-5xl"
-        style={{
-          transform: `translateY(${parallaxY}px)`,
-          opacity: fadeOpacity,
-          willChange: "transform, opacity",
-        }}
+    <>
+      <ScrollTimeline />
+      <section
+        ref={sectionRef}
+        id="hero"
+        className="section-reveal relative flex min-h-[calc(100vh-64px)] flex-col justify-center px-6 overflow-hidden"
       >
-        <p className="mb-4 text-sm font-mono text-amber tracking-wide">
-          Hello, I&apos;m
-        </p>
-        <h1 className="font-heading text-5xl font-bold leading-tight tracking-tight text-ink md:text-7xl">
-          <span>{displayText}</span>
-          <span className="typewriter-cursor ml-0.5 text-amber">|</span>
-        </h1>
-        <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted md:text-xl">
-          <CharReveal text={TAGLINE} baseDelay={0.3} />
-        </p>
-        <div className="mt-10 flex gap-4">
-          <a
-            href="#projects"
-            className="rounded-full bg-ink px-6 py-3 text-sm font-medium text-bg transition-opacity hover:opacity-80"
+        {/* Blurred amber blob — moves at 0.5x scroll speed via GSAP */}
+        <div
+          ref={blobRef}
+          aria-hidden="true"
+          style={{
+            position: "absolute",
+            top: "-10%",
+            right: "-10%",
+            width: "600px",
+            height: "600px",
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(196,138,8,0.16) 0%, transparent 70%)",
+            filter: "blur(40px)",
+            pointerEvents: "none",
+            willChange: "transform",
+          }}
+        />
+
+        <div className="mx-auto w-full max-w-5xl relative z-10">
+          <p className="mb-4 text-sm font-mono text-amber tracking-wide">
+            Hello, I&apos;m
+          </p>
+          <h1
+            ref={headingRef}
+            className="font-heading text-5xl font-bold leading-tight tracking-tight text-ink md:text-7xl"
+            style={{ willChange: "transform, opacity" }}
           >
-            See what I&apos;m building
-          </a>
-          <a
-            href="#contact"
-            className="rounded-full border border-border px-6 py-3 text-sm font-medium text-muted transition-colors hover:border-ink hover:text-ink"
+            <span>{displayText}</span>
+            <span className="typewriter-cursor ml-0.5 text-amber">|</span>
+          </h1>
+          <p
+            ref={taglineRef}
+            className="mt-6 max-w-xl text-lg leading-relaxed text-muted md:text-xl"
+            style={{ willChange: "transform, opacity" }}
           >
-            Get in touch
-          </a>
+            <CharReveal text={TAGLINE} baseDelay={0.3} />
+          </p>
+          <div
+            ref={ctasRef}
+            className="mt-10 flex gap-4"
+            style={{ willChange: "transform, opacity" }}
+          >
+            <a
+              href="#projects"
+              className="rounded-full bg-ink px-6 py-3 text-sm font-medium text-bg transition-opacity hover:opacity-80"
+            >
+              See what I&apos;m building
+            </a>
+            <a
+              href="#contact"
+              className="rounded-full border border-border px-6 py-3 text-sm font-medium text-muted transition-colors hover:border-ink hover:text-ink"
+            >
+              Get in touch
+            </a>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }
