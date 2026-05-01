@@ -22,7 +22,7 @@ const DELETING_SPEED = 50;
 const PAUSE_AFTER_TYPED = 2000;
 const PAUSE_AFTER_DELETED = 500;
 
-// Sections for the scroll-scrubbed timeline (hero is excluded)
+// Sections for the scroll-scrubbed timeline (hero is intentionally excluded)
 const NAV_SECTIONS = [
   { id: "about",    label: "About" },
   { id: "projects", label: "Projects" },
@@ -80,11 +80,11 @@ function useTypewriter(items: string[]) {
 }
 
 function CharReveal({ text, baseDelay = 0 }: { text: string; baseDelay?: number }) {
-  const words = text.split(" ");
+  const ws = text.split(" ");
   let charCount = 0;
   return (
     <>
-      {words.map((word, wi) => {
+      {ws.map((word, wi) => {
         const wordStart = charCount;
         charCount += word.length + 1;
         return (
@@ -99,7 +99,7 @@ function CharReveal({ text, baseDelay = 0 }: { text: string; baseDelay?: number 
                 </span>
               </span>
             ))}
-            {wi < words.length - 1 && " "}
+            {wi < ws.length - 1 && " "}
           </span>
         );
       })}
@@ -112,12 +112,31 @@ function ScrollTimeline() {
   const dotRefs = useRef<(HTMLDivElement | null)[]>([]);
   const labelRefs = useRef<(HTMLSpanElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Fades in after hero exits, out near footer — mirrors original ScrollProgress behaviour
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const hero = document.getElementById("hero");
+    const footer = document.querySelector("footer");
+    const obs = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((e) => {
+          if (e.target === hero) setVisible(!e.isIntersecting);
+          if (e.target === footer && e.isIntersecting) setVisible(false);
+        });
+      },
+      { threshold: 0.1 }
+    );
+    if (hero) obs.observe(hero);
+    if (footer) obs.observe(footer);
+    return () => obs.disconnect();
+  }, []);
 
   useGSAP(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) return;
 
-    // Animate the fill line from 0 to 100% as the whole page scrolls
+    // Scrubbed fill line — tracks overall page scroll progress
     gsap.fromTo(
       lineRef.current,
       { height: "0%" },
@@ -133,7 +152,7 @@ function ScrollTimeline() {
       }
     );
 
-    // Each section: highlight dot + label when in viewport
+    // Activate/deactivate each section's dot and label
     NAV_SECTIONS.forEach((section, i) => {
       const el = document.getElementById(section.id);
       if (!el) return;
@@ -152,32 +171,32 @@ function ScrollTimeline() {
     function activate(i: number) {
       const dot = dotRefs.current[i];
       const label = labelRefs.current[i];
-      if (dot) {
-        gsap.to(dot, { scale: 1.6, backgroundColor: "var(--amber)", duration: 0.3 });
-      }
+      if (dot) gsap.to(dot, { scale: 1.6, backgroundColor: "var(--amber)", duration: 0.3, overwrite: true });
       if (label) label.style.opacity = "1";
     }
     function deactivate(i: number) {
       const dot = dotRefs.current[i];
       const label = labelRefs.current[i];
-      if (dot) {
-        gsap.to(dot, { scale: 1, backgroundColor: "rgba(196,138,8,0.3)", duration: 0.3 });
-      }
+      if (dot) gsap.to(dot, { scale: 1, backgroundColor: "rgba(196,138,8,0.3)", duration: 0.3, overwrite: true });
       if (label) label.style.opacity = "0";
     }
   });
 
   return (
-    <div
+    <nav
       ref={containerRef}
-      className="fixed top-1/2 right-6 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-0"
-      aria-hidden="true"
+      aria-label="Page sections"
+      className="fixed top-1/2 right-6 -translate-y-1/2 z-40 hidden md:flex flex-col items-center"
+      style={{
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? "auto" : "none",
+        transition: "opacity 0.6s cubic-bezier(0.16,1,0.3,1)",
+      }}
     >
       <style>{`
-        .timeline-dot { transition: transform 0.3s, background-color 0.3s; }
-        .timeline-label {
+        .tl-label {
           position: absolute;
-          right: 20px;
+          right: 18px;
           font-family: var(--font-mono);
           font-size: 10px;
           color: var(--amber);
@@ -190,54 +209,40 @@ function ScrollTimeline() {
         }
       `}</style>
 
-      {/* Track */}
-      <div className="relative" style={{ width: 2, height: `${(NAV_SECTIONS.length - 1) * 48 + 8}px` }}>
-        {/* Background track */}
-        <div
-          className="absolute inset-x-0 top-0 bottom-0 rounded-full"
-          style={{ background: "rgba(196,138,8,0.15)" }}
-        />
-        {/* Fill line */}
-        <div
-          ref={lineRef}
-          className="absolute inset-x-0 top-0 rounded-full"
-          style={{ height: "0%", background: "var(--amber)", opacity: 0.6 }}
-        />
+      <div className="relative" style={{ width: 2, height: `${(NAV_SECTIONS.length - 1) * 44 + 8}px` }}>
+        {/* Track background */}
+        <div className="absolute inset-x-0 top-0 bottom-0 rounded-full"
+          style={{ background: "rgba(196,138,8,0.15)" }} />
+        {/* Scrubbed fill */}
+        <div ref={lineRef} className="absolute inset-x-0 top-0 rounded-full"
+          style={{ height: "0%", background: "var(--amber)", opacity: 0.7 }} />
 
-        {/* Dots */}
         {NAV_SECTIONS.map((section, i) => (
           <div
             key={section.id}
             className="absolute"
-            style={{
-              top: i * 48,
-              left: "50%",
-              transform: "translateX(-50%)",
-            }}
+            style={{ top: i * 44, left: "50%", transform: "translateX(-50%)" }}
           >
             <div
               ref={(el) => { dotRefs.current[i] = el; }}
-              className="timeline-dot rounded-full"
+              className="rounded-full"
               style={{
-                width: 8,
-                height: 8,
+                width: 8, height: 8,
                 backgroundColor: "rgba(196,138,8,0.3)",
                 cursor: "pointer",
+                transformOrigin: "center",
               }}
-              onClick={() => {
-                document.getElementById(section.id)?.scrollIntoView({ behavior: "smooth" });
-              }}
+              onClick={() =>
+                document.getElementById(section.id)?.scrollIntoView({ behavior: "smooth" })
+              }
             />
-            <span
-              ref={(el) => { labelRefs.current[i] = el; }}
-              className="timeline-label"
-            >
+            <span ref={(el) => { labelRefs.current[i] = el; }} className="tl-label">
               {section.label}
             </span>
           </div>
         ))}
       </div>
-    </div>
+    </nav>
   );
 }
 
@@ -255,33 +260,35 @@ export function Hero() {
     requestAnimationFrame(() => el.classList.add("in-view"));
   }, []);
 
-  // Apple-style GSAP pin: hero content scales + fades out as you scroll into next section
-  useGSAP(() => {
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const isMobile = window.matchMedia("(max-width: 767px)").matches;
-    if (prefersReduced || isMobile) return;
+  // Apple-style GSAP pin: content scales + fades as you scroll into the next section
+  useGSAP(
+    () => {
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const isMobile = window.matchMedia("(max-width: 767px)").matches;
+      if (prefersReduced || isMobile) return;
 
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: "top top",
-        end: "+=140%",
-        pin: true,
-        pinSpacing: true,
-        scrub: 0.8,
-      },
-    });
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "+=140%",
+          pin: true,
+          pinSpacing: true,
+          scrub: 0.8,
+        },
+      });
 
-    tl.to(headingRef.current, { scale: 0.85, opacity: 0, y: -40, ease: "power1.in" }, 0);
-    tl.to(taglineRef.current, { y: -60, opacity: 0, ease: "power1.in" }, 0.08);
-    tl.to(ctasRef.current, { y: -60, opacity: 0, ease: "power1.in" }, 0.14);
-  }, { scope: sectionRef as unknown as React.RefObject<HTMLElement> });
+      tl.to(headingRef.current, { scale: 0.85, opacity: 0, y: -40, ease: "power1.in" }, 0);
+      tl.to(taglineRef.current, { y: -60, opacity: 0, ease: "power1.in" }, 0.08);
+      tl.to(ctasRef.current, { y: -60, opacity: 0, ease: "power1.in" }, 0.14);
+    },
+    { scope: sectionRef as unknown as React.RefObject<HTMLElement> }
+  );
 
-  // Blob at 0.5x scroll speed via GSAP scrub
+  // Amber blob drifts at 0.5x scroll speed
   useEffect(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (prefersReduced) return;
-
     const blob = blobRef.current;
     if (!blob) return;
 
@@ -291,11 +298,9 @@ export function Hero() {
       end: "bottom bottom",
       scrub: true,
       onUpdate: (self) => {
-        const offset = self.progress * window.innerHeight * 0.5;
-        blob.style.transform = `translateY(${-offset}px)`;
+        blob.style.transform = `translateY(${-self.progress * window.innerHeight * 0.5}px)`;
       },
     });
-
     return () => st.kill();
   }, []);
 
@@ -307,7 +312,7 @@ export function Hero() {
         id="hero"
         className="section-reveal relative flex min-h-[calc(100vh-64px)] flex-col justify-center px-6 overflow-hidden"
       >
-        {/* Blurred amber blob — moves at 0.5x scroll speed via GSAP */}
+        {/* Blurred amber blob — drifts at 0.5x scroll speed */}
         <div
           ref={blobRef}
           aria-hidden="true"
@@ -326,9 +331,7 @@ export function Hero() {
         />
 
         <div className="mx-auto w-full max-w-5xl relative z-10">
-          <p className="mb-4 text-sm font-mono text-amber tracking-wide">
-            Hello, I&apos;m
-          </p>
+          <p className="mb-4 text-sm font-mono text-amber tracking-wide">Hello, I&apos;m</p>
           <h1
             ref={headingRef}
             className="font-heading text-5xl font-bold leading-tight tracking-tight text-ink md:text-7xl"

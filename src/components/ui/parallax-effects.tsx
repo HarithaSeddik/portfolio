@@ -1,9 +1,9 @@
 "use client";
 
 import { useInterSectionParallax } from "@/lib/use-inter-section-parallax";
-import { ScrollProgress } from "./scroll-progress";
 
+// ScrollProgress replaced by the GSAP scroll timeline in hero.tsx
 export function ParallaxEffects() {
   useInterSectionParallax();
-  return <ScrollProgress />;
+  return null;
 }
