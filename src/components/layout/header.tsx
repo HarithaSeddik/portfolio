@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useState } from "react";
 
 const navItems = [
-  { label: "About", href: "#about" },
-  { label: "Projects", href: "#projects" },
-  { label: "Stack", href: "#stack" },
+  { label: "About", href: "/#about" },
+  { label: "Projects", href: "/#projects" },
+  { label: "Stack", href: "/#stack" },
   { label: "Experience", href: "/experience" },
-  { label: "Beyond", href: "#beyond" },
-  { label: "Contact", href: "#contact" },
+  { label: "Beyond", href: "/#beyond" },
+  { label: "Contact", href: "/#contact" },
 ];
 
 export function Header() {
@@ -21,18 +21,27 @@ export function Header() {
       style={{ viewTransitionName: "site-header" }}
     >
       <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-        <a
-          href="#"
+        <Link
+          href="/"
           className="font-heading text-lg font-semibold tracking-tight text-ink"
         >
           haritha.
-        </a>
+        </Link>
 
         {/* Desktop nav */}
         <ul className="hidden gap-8 md:flex">
           {navItems.map((item) => (
             <li key={item.href}>
-              {item.href.startsWith("/") ? (
+              {/* Hash links (/#section) use plain <a> — works from any page,
+                  native smooth scroll on home, full nav on other pages */}
+              {item.href.includes("#") ? (
+                <a
+                  href={item.href}
+                  className="nav-link text-sm text-muted transition-colors hover:text-ink"
+                >
+                  {item.label}
+                </a>
+              ) : (
                 <Link
                   href={item.href}
                   transitionTypes={["nav-forward"]}
@@ -40,13 +49,6 @@ export function Header() {
                 >
                   {item.label}
                 </Link>
-              ) : (
-                <a
-                  href={item.href}
-                  className="nav-link text-sm text-muted transition-colors hover:text-ink"
-                >
-                  {item.label}
-                </a>
               )}
             </li>
           ))}
@@ -81,7 +83,15 @@ export function Header() {
           <ul className="flex flex-col gap-4">
             {navItems.map((item) => (
               <li key={item.href}>
-                {item.href.startsWith("/") ? (
+                {item.href.includes("#") ? (
+                  <a
+                    href={item.href}
+                    className="text-muted transition-colors hover:text-ink"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {item.label}
+                  </a>
+                ) : (
                   <Link
                     href={item.href}
                     transitionTypes={["nav-forward"]}
@@ -90,14 +100,6 @@ export function Header() {
                   >
                     {item.label}
                   </Link>
-                ) : (
-                  <a
-                    href={item.href}
-                    className="text-muted transition-colors hover:text-ink"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    {item.label}
-                  </a>
                 )}
               </li>
             ))}
