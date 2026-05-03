@@ -49,44 +49,70 @@ const projects: Project[] = [
   },
 ];
 
-// Sticky stack constants
-const CARD_H = 460;   // visual card height (px)
-const PEEK = 24;      // px each card's top peeks above the one stacked on it
-const SPACER = 360;   // px of scroll room per card before next card arrives
-const BASE_TOP = 88;  // sticky top offset (px) — clears the fixed header
+// Apple Wallet stack constants
+const CARD_H = 480;       // visible card height (px)
+const PEEK = 32;          // px each card's top edge peeks above the one in front
+const N = projects.length;
+
+// Container height = full card + peek strips for every card behind it
+const CONTAINER_H = CARD_H + PEEK * (N - 1); // 480 + 64 = 544px
 
 export function Projects() {
   const sectionRef = useSectionReveal();
-  // slotRefs: the outer wrapper div for each card (provides scroll room)
-  const slotRefs = useRef<(HTMLDivElement | null)[]>([]);
-  // innerRefs: the visual card div that gets scaled down when covered
-  const innerRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Scale-down depth effect: as the next card arrives, the current card
-  // compresses slightly to create a layered depth illusion
   useGSAP(() => {
     const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const isMobile = window.matchMedia("(max-width: 767px)").matches;
     if (prefersReduced || isMobile) return;
 
-    innerRefs.current.forEach((inner, i) => {
-      if (!inner || i === projects.length - 1) return;
-      const nextSlot = slotRefs.current[i + 1];
-      if (!nextSlot) return;
+    const container = containerRef.current;
+    const cards = cardRefs.current.filter(Boolean) as HTMLDivElement[];
+    if (!container || cards.length < 2) return;
 
-      gsap.to(inner, {
-        scale: 0.93,
-        ease: "none",
-        scrollTrigger: {
-          trigger: nextSlot,
-          // Start compressing when the next slot enters from the bottom,
-          // finish by the time the next card has fully stacked on top
-          start: "top bottom",
-          end: `top+=${CARD_H * 0.6} bottom`,
-          scrub: true,
-        },
-      });
+    // Park cards 2+ below the container's visible area so they start hidden.
+    // overflow:hidden on the container clips them until GSAP slides them up.
+    for (let i = 1; i < cards.length; i++) {
+      gsap.set(cards[i], { y: CONTAINER_H + (i - 1) * CARD_H });
+    }
+
+    // Timeline is scrubbed to scroll. Two phases (one per incoming card) with
+    // a brief hold between them so the visitor reads each stacked state.
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: container,
+        start: "top top+=64",                      // pin just below the header
+        end: `+=${(N - 1) * 640 + 480}`,          // ~1760px total scroll room
+        pin: true,
+        pinSpacing: true,
+        scrub: 1.5,
+      },
     });
+
+    for (let i = 1; i < N; i++) {
+      const phaseStart = (i - 1) * 1.8; // each phase separated by 1.8 timeline units
+
+      // Incoming card slides up from off-screen to its stacked y position
+      tl.to(cards[i], {
+        y: PEEK * i,        // e.g. card 1 → 32px, card 2 → 64px
+        ease: "none",
+        duration: 1,
+      }, phaseStart);
+
+      // Every card below the incoming one compresses slightly (depth illusion)
+      for (let j = 0; j < i; j++) {
+        const depthBelow = i - j;          // 1 = directly below, 2 = two layers below
+        tl.to(cards[j], {
+          scale: 1 - depthBelow * 0.03,   // 0.97 / 0.94 — subtle but readable
+          ease: "none",
+          duration: 1,
+        }, phaseStart);
+      }
+    }
+
+    // Final hold: full wallet stack is visible for a beat before section unpins
+    tl.to({}, { duration: 1.2 });
   });
 
   return (
@@ -104,58 +130,44 @@ export function Projects() {
           AI-first projects that explore the intersection of software engineering and generative AI.
         </p>
 
-        {/* ── Sticky stack — desktop ───────────────────────────────────────── */}
-        <div className="hidden md:block mt-16">
-          {projects.map((project, i) => {
-            const isLast = i === projects.length - 1;
-            // Last slot gets extra height so the full stack stays visible a beat
-            // before the section ends
-            const slotHeight = CARD_H + SPACER + (isLast ? 280 : 0);
-
-            return (
-              <div
-                key={project.title}
-                ref={(el) => { slotRefs.current[i] = el; }}
-                style={{ height: slotHeight, position: "relative" }}
-              >
-                {/*
-                  The sticky wrapper is a DIRECT child of the slot and has
-                  its own height. The slot is taller, providing the scroll room
-                  that makes the sticky effect work.
-                */}
-                <div
-                  style={{
-                    position: "sticky",
-                    top: BASE_TOP + i * PEEK,
-                    zIndex: i + 1,
-                    height: CARD_H,
-                  }}
+        {/* ── Apple Wallet stack — desktop ─────────────────────────────────── */}
+        {/*
+          All cards are position:absolute inside this container.
+          overflow:hidden clips the off-screen starting positions.
+          GSAP pins the container and scrubs the timeline to scroll.
+        */}
+        <div
+          ref={containerRef}
+          className="hidden md:block mt-16 relative"
+          style={{ height: CONTAINER_H, overflow: "hidden" }}
+        >
+          {projects.map((project, i) => (
+            <div
+              key={project.title}
+              ref={(el) => { cardRefs.current[i] = el; }}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                height: CARD_H,
+                zIndex: i + 1,
+                transformOrigin: "center top",
+              }}
+            >
+              {project.slug ? (
+                <Link
+                  href={`/projects/${project.slug}`}
+                  transitionTypes={["nav-forward"]}
+                  style={{ display: "block", height: "100%", textDecoration: "none" }}
                 >
-                  {project.slug ? (
-                    <Link
-                      href={`/projects/${project.slug}`}
-                      transitionTypes={["nav-forward"]}
-                      style={{ display: "block", height: "100%", textDecoration: "none" }}
-                    >
-                      <StackCard
-                        project={project}
-                        index={i}
-                        total={projects.length}
-                        innerRef={(el) => { innerRefs.current[i] = el; }}
-                      />
-                    </Link>
-                  ) : (
-                    <StackCard
-                      project={project}
-                      index={i}
-                      total={projects.length}
-                      innerRef={(el) => { innerRefs.current[i] = el; }}
-                    />
-                  )}
-                </div>
-              </div>
-            );
-          })}
+                  <WalletCard project={project} index={i} total={N} />
+                </Link>
+              ) : (
+                <WalletCard project={project} index={i} total={N} />
+              )}
+            </div>
+          ))}
         </div>
 
         {/* ── Mobile fallback ──────────────────────────────────────────────── */}
@@ -187,45 +199,37 @@ export function Projects() {
   );
 }
 
-function StackCard({
+function WalletCard({
   project,
   index,
   total,
-  innerRef,
 }: {
   project: Project;
   index: number;
   total: number;
-  innerRef: (el: HTMLDivElement | null) => void;
 }) {
   return (
     <div
-      ref={innerRef}
       style={{
         height: "100%",
         borderRadius: 20,
         overflow: "hidden",
         border: "1px solid rgba(196,138,8,0.15)",
         background: "var(--bg)",
-        boxShadow: `0 ${8 + index * 6}px ${40 + index * 20}px rgba(23,21,14,${0.07 + index * 0.02})`,
+        boxShadow: `0 ${8 + index * 8}px ${36 + index * 24}px rgba(23,21,14,${0.07 + index * 0.025})`,
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
-        transformOrigin: "center top",
       }}
     >
-      {/* Left: placeholder image */}
-      <div
-        aria-hidden="true"
-        style={{ position: "relative", background: project.placeholderColor }}
-      >
-        {/* Subtle dot-grid texture */}
+      {/* Left: placeholder image panel */}
+      <div aria-hidden="true" style={{ position: "relative", background: project.placeholderColor }}>
+        {/* Dot-grid texture */}
         <div
           style={{
             position: "absolute",
             inset: 0,
-            backgroundImage:
-              "radial-gradient(circle, rgba(23,21,14,0.08) 1px, transparent 1px)",
-            backgroundSize: "24px 24px",
+            backgroundImage: "radial-gradient(circle, rgba(23,21,14,0.07) 1px, transparent 1px)",
+            backgroundSize: "22px 22px",
           }}
         />
         <span
@@ -234,7 +238,7 @@ function StackCard({
             bottom: 20,
             left: 20,
             fontFamily: "var(--font-mono)",
-            fontSize: "11px",
+            fontSize: 11,
             color: "rgba(23,21,14,0.35)",
             letterSpacing: "0.1em",
           }}
@@ -311,14 +315,7 @@ function StackCard({
         </div>
 
         {project.slug && (
-          <span
-            style={{
-              fontFamily: "var(--font-mono)",
-              fontSize: 12,
-              color: "var(--amber)",
-              marginTop: 4,
-            }}
-          >
+          <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "var(--amber)", marginTop: 4 }}>
             Read more →
           </span>
         )}
@@ -330,10 +327,7 @@ function StackCard({
 function MobileCard({ project }: { project: Project }) {
   return (
     <div className="rounded-2xl border border-border/50 bg-bg overflow-hidden">
-      <div
-        aria-hidden="true"
-        style={{ height: 140, background: project.placeholderColor }}
-      />
+      <div aria-hidden="true" style={{ height: 140, background: project.placeholderColor }} />
       <div className="p-6">
         {project.status === "coming-soon" && (
           <span className="mb-3 inline-block rounded-full bg-amber-pale px-3 py-1 font-mono text-xs text-amber">
